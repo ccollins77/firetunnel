@@ -18,7 +18,7 @@ going on some ISP networks.
 Setup and configuration are extremely easy.
 For every single aspect of the tunnel we provide sensible defaults.
 Everything is integrated seamlessly with Firejail.
-
+<br><br>
 
 ## Features
 
@@ -45,7 +45,7 @@ Everything is integrated seamlessly with Firejail.
 * Fast and easy to use.
 
 * License: GPLv2
-
+<br><br>
 
 ## Software install
 
@@ -61,9 +61,9 @@ $ git clone https://github.com/netblue30/firetunnel.git
 $ cd firetunnel
 $ ./configure && make && sudo make install-strip
 `````
-
+<br><br>
 ## Usage
-
+<br><br>
 ![network diagram](drawing2.png)
 
 You need two computers, one for the client and one for the server.
@@ -100,8 +100,9 @@ $ firejail --tunnel firefox &
 $ firejail --tunnel transmission-qt &
 `````
 Multiple clients can be connected to the same server machine, this is an example:
+<br><br>
 ![network diagram](drawing4.png)
-
+<br><br>
 ## Project status: version 0.8, beta testing
 
 

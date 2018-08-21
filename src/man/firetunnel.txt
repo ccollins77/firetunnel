@@ -1,0 +1,198 @@
+.TH FIRETUNNEL 1 "MONTH YEAR" "VERSION" "firetunnel man page"
+.SH NAME
+Firetunnel \- Tunneling program for Firejail sandboxes
+.SH SYNOPSIS
+Start the server:
+.PP
+.RS
+firetunnel --server [OPTIONS]
+.RE
+.PP
+Start the client:
+.PP
+.RS
+firetunnel [OPTIONS] server-ip-address
+.RE
+.PP
+Start your Firejail sandboxes (on both client and server side):
+.PP
+.RS
+firejail --tunnel application
+.RE
+.SH DESCRIPTION
+Firetunnel is a simple program for connecting multiple Firejail sandboxes
+on a virtualized Ethernet network. Applications include
+virtual private networks (VPN), overlay networks, peer-to-peer applications.
+.PP
+The tunnel encapsulates Ethernet frames in UDP packets. Each packet is authenticated
+independently with BLAKE2 cryptographic hash function (https://blake2.net/).
+The keys are derived from a common secret file
+installed on both client and server.
+.PP
+The traffic is not encrypted. On Linux, several excellent programs are already
+providing military-grade encryption. Among them OpenVPN, stunnel, Wireguard.
+If this is what you are looking for, Firetunnel should not be your choice.
+However, we do some light-weight bit scrambling.
+Our goal is to avoid the data collection and the blacklist-based traffic shaping
+going on some ISP networks.
+.PP
+Setup and configuration are extremely easy.
+For every single aspect of the tunnel we provide sensible defaults.
+Everything is integrated seamlessly with Firejail.
+.PP
+.SH ABOUT THE TUNNEL
+The tunnel network is an overlay network with IP addresses in 10.10.20.0/24 range.
+The server itself is the default gateway at 10.10.20.1.
+It is also the place where your packets go out on the Internet using NAT.
+.PP
+MTU is calculated on the server side for the specific
+tunnel configuration. The default value is 1426.
+.PP
+The tunnel uses header compression for MAC/IP/TCP layers. This results in
+better response time due to the smaller packet sizes, and reduces the
+probability of packet loss on slower connections.
+.PP
+You can change the defaults on the server side using \-\-netaddr, \-\-netmask, \-\-defaultgw and \-\-mtu.
+The server will pass the configuration to the client and to your sandboxes.
+.PP
+The server also handles DNS. In /etc/firetunnel/firetunnel.config we list 8 public DNS servers
+such as 1.1.1.1 and 9.9.9.9. At startup we test each one of them and pick up the fastest ones.
+.PP
+.SH USAGE
+You need two computers, one for the client and one for the server.
+The time needs to be synchronized between them in a 30 second window.
+This should not be a problem, by default most Linux distributions are running an NTP daemon.
+Start by setting a common secret file in /etc/firetunnel/firetunnel.secret:
+.PP
+.RS
+# cp summer.jpg /etc/firetunnel/firetunnel.secret
+.RE
+.PP
+Any file will do as long as the same file is installed on both computers. You also need to configure
+the access permissions:
+.PP
+.RS
+# chmod 600 /etc/firetunnel/firetunnel.secret
+.RE
+.PP
+SSH into your remote computer and start the server:
+.PP
+.RS
+# firetunnel --server
+.RE
+.PP
+In a different terminal on your home computer start the client:
+.PP
+.RS
+# firetunnel 198.51.100.23
+.RE
+.PP
+198.51.100.23 is in this example the remote server IP address.
+In a few seconds you will see the client connecting and receiving the tunnel configuration:
+.PP
+.RS
+2018-08-01 21:09:01 198.51.100.23:1119 connected
+.br
+2018-08-01 21:09:01 Tunnel: 10.10.20.0/24, default gw 10.10.20.1, mtu 1426
+.br
+2018-08-01 21:09:01 Tunnel: DNS 1.1.1.1, 208.67.222.222, 9.9.9.9
+.br
+.RE
+.PP
+All the commands above are entered as root. Time to switch back to your regular user
+and start a few sandboxes on your client computer:
+.PP
+.RS
+$ firejail --tunnel firefox &
+.br
+$ firejail --tunnel transmission-qt &
+.br
+.RE
+.PP
+That's all that is, enjoy!
+
+.SH OPTIONS
+
+.TP
+\fB\-?\fR, \fB\-\-help\fR
+Print options end exit.
+
+.TP
+\fB\-\-bridge=device
+Use this Linux bridge device to aggregate traffic into your tunnel. A kernel TAP device implementing the UDP transport
+will be connected to this bridge. Firejail sandboxes will also be connected to this bridge.
+Without this option, the default server bridge device is \fBfts\fR, and the client bridge device if \fBftc\fR.
+
+.TP
+\fB\-\-daemonize
+Detach from the controlling terminal and run as a Unix daemon. Only stdin
+is redirected to /dev/null.
+
+.TP
+\fB\-\-debug
+Print debug information
+
+.TP
+\fB\-\-defaultgw=address
+Tunnel default gateway address, default 10.10.20.1. The server bridge device is assigned this address.
+Network address translation is implemented in the system firewall (netfilter) in order to access the outside world.
+
+.TP
+\fB\-\-dns=address
+Add this DNS server to the list of DNS servers. The server will test each DNS server in the list
+and pick up the fastest three.
+
+.TP
+\fB\-\-mtu=number
+In the default configuration maximum transmission unit for the interfaces inside the tunnel is 1426.
+Use this option on the server side of the tunnel to overwrite the default.
+
+.TP
+\fB\-\-netaddr=address
+Tunnel network address, default 10.10.20.0.
+
+.TP
+\fB\-\-netmask=mask
+Tunnel network mask, default 255.255.255.0.
+
+.TP
+\fB\-\-nonat
+Network address translation disabled. The network traffic will remain in the tunnel network.
+
+.TP
+\fB\-\-noscrambling
+Scrambling disabled, the packets are sent in clear.
+
+.TP
+\fB\-\-noseccomp
+Whitelist seccomp filters are applied to firetunnel processes. The definitions for these filters
+can be found in  /etc/firetunnel/firetunnel.config file. This option disables seccomp functionality.
+
+.TP
+\fB\-\-port=number
+Server UDP port number, default 1119.
+
+.TP
+\fB\-\-profile=file
+Extract the tunnel configuration from this profile file. The default configuration file is /etc/firejail/default.profile.
+
+.TP
+\fB\-\-server
+Act as a server for the tunnel.
+
+.TP
+\fB\-\-version
+Print software version and exit.
+
+.SH PROFILE FILES
+Most command line options can be passed to the program using profile files. The following commands
+are implemented: daemonize, dns, bridge, defaultgw, mtu, netaddr, metmask, nonat, noscrambling, noseccomp, and server.
+Use /etc/firejail/default.profile as an example.
+
+
+.SH LICENSE
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+.PP
+Homepage: https://firejail.wordpress.com
+.SH SEE ALSO
+\&\flfirejail\fR\|(1),

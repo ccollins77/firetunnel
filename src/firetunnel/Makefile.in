@@ -1,0 +1,14 @@
+all: firetunnel
+
+include ../common.mk
+
+%.o : %.c $(H_FILE_LIST)
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(INCLUDE) -c $< -o $@
+
+firetunnel: $(OBJS)
+	$(CC)  $(LDFLAGS) -o $@ $(OBJS) $(EXTRA_LDFLAGS)
+
+clean:; rm -f *.o firetunnel *.gcov *.gcda *.gcno
+
+distclean: clean
+	rm -fr Makefile

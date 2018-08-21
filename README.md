@@ -38,7 +38,7 @@ Everything is integrated seamlessly with Firejail.
 
 * Automatic network configuration for client and sandboxes based on RFC 5227 and our tunnel configuration protocol.
 
-* Runs on any Linux system with a kernel 3.5 or better.
+* Runs on any Linux system with a kernel 3.5 or newer.
 
 * Minimal attack surface, seccomp support.
 
@@ -67,7 +67,7 @@ $ ./configure && make && sudo make install-strip
 ![network diagram](drawing2.png)
 
 You need two computers, one for the client and one for the server.
-The time needs to be synchronized between them in a 30 second window.
+The time needs to be synchronized between them in a 10 second window.
 This should not be a problem, by default most Linux distributions are running the NTP daemon.
 Start by setting a common secret file in /etc/firetunnel/firetunnel.secret:
 `````
@@ -100,7 +100,7 @@ $ firejail --tunnel firefox &
 $ firejail --tunnel transmission-qt &
 `````
 Multiple clients can be connected to the same server machine, this is an example:
-![network diagram](drawing4.svg.png)
+![network diagram](drawing4.png)
 
 ## Project status: version 0.8, beta testing
 

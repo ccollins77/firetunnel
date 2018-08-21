@@ -101,6 +101,7 @@ $ firejail --tunnel transmission-qt &
 `````
 Multiple clients can be connected to the same server machine, this is an example:
 <br><br>
+<br><br>
 ![network diagram](drawing4.png)
 <br><br>
 ## Project status: version 0.8, beta testing

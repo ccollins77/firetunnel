@@ -45,9 +45,9 @@ typedef struct mac_connection_t {
 	int active;
 	int cnt;
 	Session s;
-} MacConnection;
-static MacConnection connection_s2c[256];
-static MacConnection connection_c2s[256];
+} Connection;
+static Connection connection_s2c[256];
+static Connection connection_c2s[256];
 
 void compress_l2_init(void) {
 	memset(connection_s2c, 0, sizeof(connection_s2c));
@@ -55,8 +55,8 @@ void compress_l2_init(void) {
 }
 
 void print_compress_l2_table(int direction) {
-	MacConnection *conn = (direction == S2C)? connection_s2c: connection_c2s;
-	printf("Compression l2 hash table:\n");
+	Connection *conn = (direction == S2C)? connection_s2c: connection_c2s;
+	printf("Compression L2 hash table:\n");
 	int i;
 	for (i = 0; i < 256; i++, conn++) {
 		if (conn->active) {
@@ -82,7 +82,7 @@ int classify_l2(uint8_t *pkt, uint8_t *sid, int direction) {
 	if (sid)
 		*sid = hash;
 
-	MacConnection *conn = (direction == S2C)? &connection_s2c[hash]: &connection_c2s[hash];
+	Connection *conn = (direction == S2C)? &connection_s2c[hash]: &connection_c2s[hash];
 	if (conn->active) {
 		if (memcmp(&s, &conn->s, sizeof(Session)) == 0) {
 			conn->cnt++;
@@ -120,7 +120,7 @@ int compress_l2(uint8_t *pkt, int nbytes, uint8_t sid, int direction) {
 }
 
 int decompress_l2(uint8_t *pkt, int nbytes, uint8_t sid, int direction) {
-	MacConnection *conn = (direction == S2C)? &connection_s2c[sid]: &connection_c2s[sid];
+	Connection *conn = (direction == S2C)? &connection_s2c[sid]: &connection_c2s[sid];
 	Session *s = &conn->s;
 
 	// build the real header

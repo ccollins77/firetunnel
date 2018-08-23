@@ -171,10 +171,11 @@ static inline void dbg_printf(char *fmt, ...) {
 // udp packet structure:    | ip/udp transport | tunnel header | Ethernet frame | padding | BLACKE2 hash (16/32/64 bytes) |
 typedef struct packet_header_t {
 // opcode
-#define O_HELLO 1
-#define O_MESSAGE 2
-#define O_DATA  3
-#define O_DATA_COMPRESSED  4
+#define O_HELLO 0
+#define O_MESSAGE 1
+#define O_DATA  2
+#define O_DATA_COMPRESSED  3
+#define O_DATA_COMPRESSED_DNS  4
 #define O_DATA_COMPRESSED_L2  5
 #define O_MAX 6 // the last one
 
@@ -409,5 +410,13 @@ void print_compress_l2_table(int direction);
 int classify_l2(uint8_t *pkt, uint8_t *sid, int direction);
 int compress_l2(uint8_t *pkt, int nbytes, uint8_t sid, int direction);
 int decompress_l2(uint8_t *pkt, int nbytes, uint8_t sid, int direction);
+
+// compress_dns.c
+int compress_dns_size(void);
+void compress_dns_init(void);
+void print_compress_dns_table(int direction);
+int classify_dns(uint8_t *pkt, uint8_t *sid, int direction);
+int compress_dns(uint8_t *pkt, int nbytes, uint8_t sid, int direction);
+int decompress_dns(uint8_t *pkt, int nbytes, uint8_t sid, int direction);
 
 #endif

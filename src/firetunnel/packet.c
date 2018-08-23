@@ -151,7 +151,7 @@ void pkt_send_hello(UdpFrame *frame, int udpfd) {
 void pkt_print_stats(UdpFrame *frame, int udpfd) {
 	if (tunnel.state == S_DISCONNECTED)
 		return;
-		
+
 	// build the stats message
 	char buf[1024];
 	char *ptr = buf;
@@ -186,10 +186,8 @@ void pkt_print_stats(UdpFrame *frame, int udpfd) {
 		printf(ptr, "blake2 %u, ", tunnel.stats.udp_rx_drop_blake2_pkt);
 		ptr += strlen(ptr);
 	}
-	if (tunnel.stats.udp_rx_drop_padding_pkt) {
+	if (tunnel.stats.udp_rx_drop_padding_pkt)
 		sprintf(ptr, "padding %u", tunnel.stats.udp_rx_drop_padding_pkt);
-		ptr += strlen(ptr);
-	}
 
 	// print stats message on console
 	printf("%s\n", buf);

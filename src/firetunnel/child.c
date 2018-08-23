@@ -95,6 +95,7 @@ void child(int socket) {
 						memset(&tunnel.remote_sock_addr, 0, sizeof(tunnel.remote_sock_addr));
 					compress_init();
 					compress_l2_init();
+					compress_dns_init();
 					logmsg("%d.%d.%d.%d:%d disconnected\n",
 					       PRINT_IP(ntohl(tunnel.remote_sock_addr.sin_addr.s_addr)),
 					       ntohs(tunnel.remote_sock_addr.sin_port));
@@ -109,14 +110,15 @@ void child(int socket) {
 				pkt_print_stats(udpframe, tunnel.udpfd);
 			}
 
-			if (arg_debug) {
+//			if (arg_debug) {
 				if (++compresscnt >= COMPRESS_TIMEOUT_MAX) {
 					compresscnt = 0;
 					int direction = (arg_server)? S2C: C2S;
 					print_compress_table(direction);
 					print_compress_l2_table(direction);
+					print_compress_dns_table(direction);
 				}
-			}
+//			}
 			continue;
 		}
 
@@ -140,13 +142,15 @@ void child(int socket) {
 			else {
 				int compression = 0;
 				int compression_l2 = 0;
+				int compression_dns = 0;
 				uint8_t sid;	// session id if compression is set
 				if (pkt_is_dns(udpframe->eth, nbytes))
 					tunnel.stats.eth_rx_dns++;
 
 				int direction = (arg_server)? S2C: C2S;
-				if ((pkt_is_tcp(udpframe->eth, nbytes) || pkt_is_udp(udpframe->eth, nbytes)) &&
-				     !pkt_is_dns(udpframe->eth, nbytes))
+				if (pkt_is_dns(udpframe->eth,  nbytes))
+					compression_dns = classify_dns(udpframe->eth, &sid, direction);
+				else if (pkt_is_tcp(udpframe->eth, nbytes) || pkt_is_udp(udpframe->eth, nbytes))
 					compression = classify(udpframe->eth, &sid, direction);
 				else
 					compression_l2 = classify_l2(udpframe->eth, &sid, direction);
@@ -162,6 +166,14 @@ void child(int socket) {
 					nbytes -= rv;
 					ethptr += rv;
 					pkt_set_header(&hdr, O_DATA_COMPRESSED, tunnel.seq);
+					hdr.sid = sid;
+				}
+				else if (compression_dns) {
+					dbg_printf("compressing DNS ");
+					int rv = compress_dns(udpframe->eth, nbytes, sid, direction);
+					nbytes -= rv;
+					ethptr += rv;
+					pkt_set_header(&hdr, O_DATA_COMPRESSED_DNS, tunnel.seq);
 					hdr.sid = sid;
 				}
 				else if (compression_l2) {
@@ -220,7 +232,8 @@ void child(int socket) {
 					tunnel.remote_seq = ntohs(udpframe->header.seq);
 
 				uint8_t opcode = udpframe->header.opcode;
-				if (opcode == O_DATA || opcode == O_DATA_COMPRESSED || opcode == O_DATA_COMPRESSED_L2) {
+				if (opcode == O_DATA || opcode == O_DATA_COMPRESSED ||
+				    opcode == O_DATA_COMPRESSED_L2 || opcode == O_DATA_COMPRESSED_DNS) {
 					dbg_printf("data ");
 
 					// descramble
@@ -240,14 +253,21 @@ void child(int socket) {
 							ethstart -= rv;
 							nbytes += rv;
 						}
+						else if (opcode == O_DATA_COMPRESSED_DNS) {
+							dbg_printf("decompress DNS ");
+							rv = decompress_dns(ethstart, nbytes, udpframe->header.sid, direction);
+							ethstart -= rv;
+							nbytes += rv;
+						}
 						else if (opcode == O_DATA_COMPRESSED_L2) {
 							dbg_printf("decompress L2 ");
 							rv = decompress_l2(ethstart, nbytes, udpframe->header.sid, direction);
 							ethstart -= rv;
 							nbytes += rv;
 						}
-						if ((pkt_is_tcp(ethstart, nbytes) || pkt_is_udp(ethstart, nbytes)) &&
-						     !pkt_is_dns(ethstart, nbytes))
+						if (pkt_is_dns(ethstart, nbytes))
+							classify_dns(ethstart, NULL, direction);
+						else if (pkt_is_tcp(ethstart, nbytes) || pkt_is_udp(ethstart, nbytes))
 							classify(ethstart, NULL, direction);
 						else
 							classify_l2(ethstart, NULL, direction);

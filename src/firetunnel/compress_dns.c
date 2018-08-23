@@ -30,9 +30,8 @@ typedef struct session_t {	// offset
 	uint8_t protocol;	// 23
 	uint16_t checksum;	// 24 - use a default value and recalculate in decompress()
 	uint8_t addr[8];	// 26
-	uint8_t tcp[4];	// 34 - tcp/udp port src, dest
-} __attribute__((__packed__)) Session;	// 38
-#define FULL_HEADER_LEN 38
+} __attribute__((__packed__)) Session;	// 34
+#define FULL_HEADER_LEN 34
 
 // fields not included in params above
 typedef struct new_header_t {	// offset
@@ -41,7 +40,7 @@ typedef struct new_header_t {	// offset
 	uint8_t ttl;		// 22
 } __attribute__((__packed__)) NewHeader;
 
-int compress_size(void) {
+int compress_dns_size(void) {
 	return FULL_HEADER_LEN - sizeof(NewHeader);
 }
 
@@ -54,24 +53,17 @@ static void set_session(uint8_t *ptr, Session *s) {
 	s->protocol = *(ptr + 23);
 	s->checksum = 0x55aa;
 	memcpy(s->addr, ptr + 26, 8);
-	memcpy(s->tcp, ptr + 34, 4);
 }
 
 static void print_session(Session *s) {
 	uint32_t ip;
 	memcpy(&ip, s->addr, 4);
 	ip = ntohl(ip);
-
-	uint16_t port;
-	memcpy(&port, s->tcp, 2);
-	port = ntohs(port);
-	printf("%d.%d.%d.%d:%u -> ", PRINT_IP(ip), port);
+	printf("%d.%d.%d.%d -> ", PRINT_IP(ip));
 
 	memcpy(&ip, s->addr + 4, 4);
 	ip = ntohl(ip);
-	memcpy(&port, s->tcp + 2, 2);
-	port = ntohs(port);
-	printf("%d.%d.%d.%d:%u\n", PRINT_IP(ip), port);
+	printf("%d.%d.%d.%d\n", PRINT_IP(ip));
 }
 
 static void set_new_header(uint8_t *ptr, NewHeader *h) {
@@ -90,14 +82,14 @@ typedef struct tcp_connection_t {
 static Connection connection_s2c[256];
 static Connection connection_c2s[256];
 
-void compress_init(void) {
+void compress_dns_init(void) {
 	memset(connection_s2c, 0, sizeof(connection_s2c));
 	memset(connection_c2s, 0, sizeof(connection_c2s));
 }
 
-void print_compress_table(int direction) {
+void print_compress_dns_table(int direction) {
 	Connection *conn = (direction == S2C)? &connection_s2c[0]: &connection_c2s[0];
-	printf("Compression TCP/UDP table:\n");
+	printf("Compression DNS table:\n");
 	int i;
 	for (i = 0; i < 256; i++, conn++) {
 		if (conn->active) {
@@ -109,7 +101,7 @@ void print_compress_table(int direction) {
 
 // record the session and return 1 if the packet can be compressed
 // store the hash in sid if sid not null
-int classify(uint8_t *pkt, uint8_t *sid, int direction) {
+int classify_dns(uint8_t *pkt, uint8_t *sid, int direction) {
 	int rv = 0;
 	Session s;
 	set_session(pkt, &s);
@@ -153,11 +145,11 @@ int classify(uint8_t *pkt, uint8_t *sid, int direction) {
 	return rv;
 }
 
-int compress(uint8_t *pkt, int nbytes, uint8_t sid, int direction) {
+int compress_dns(uint8_t *pkt, int nbytes, uint8_t sid, int direction) {
 //uint16_t len;
 //memcpy(&len, pkt + 14 + 2, 2);
 //len = ntohs(len);
-//printf("len %u, nbytes %d\n", len, nbytes);
+//printf("compress ip len %u\n", len);
 
 	(void) direction;
 	tunnel.stats.udp_tx_compressed_pkt++;
@@ -168,7 +160,7 @@ int compress(uint8_t *pkt, int nbytes, uint8_t sid, int direction) {
 	return FULL_HEADER_LEN - sizeof(NewHeader);
 }
 
-int decompress(uint8_t *pkt, int nbytes, uint8_t sid, int direction) {
+int decompress_dns(uint8_t *pkt, int nbytes, uint8_t sid, int direction) {
 	Connection *conn = (direction == S2C)? &connection_s2c[sid]: &connection_c2s[sid];
 	Session *s = &conn->s;
 	NewHeader h;
@@ -181,7 +173,7 @@ int decompress(uint8_t *pkt, int nbytes, uint8_t sid, int direction) {
 
 	// recalculate len
 	uint16_t len = nbytes + FULL_HEADER_LEN - sizeof(h) - 14;
-//printf("nbytes %d, new len %d\n", nbytes, len);
+//printf("decompress nbytes %d, ip len %d\n", nbytes, len);
 	len = htons(len);
 	memcpy(pkt + 16, &len, 2);
 
@@ -190,7 +182,6 @@ int decompress(uint8_t *pkt, int nbytes, uint8_t sid, int direction) {
 	*(pkt + 22) = h.ttl;
 	*(pkt + 23) = s->protocol;
 	memcpy(pkt + 26, s->addr, 8);
-	memcpy(pkt + 34, s->tcp, 4);
 
 	// calculate ip checksum
 	memset(pkt + 24, 0, 2);

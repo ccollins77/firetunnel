@@ -107,7 +107,7 @@ int classify_dns(uint8_t *pkt, uint8_t *sid, int direction) {
 	set_session(pkt, &s);
 
 	uint8_t hash = 0;
-	int i;
+	unsigned i;
 	uint8_t *ptr = (uint8_t *) &s;
 	for ( i = 0; i < sizeof(s); i++, ptr++)
 		hash ^= *ptr;
@@ -126,8 +126,6 @@ int classify_dns(uint8_t *pkt, uint8_t *sid, int direction) {
 				rv = 1;
 			else if (cnt > 3 && cnt % 8)
 				rv = 1;
-			else
-				;
 		}
 		else {
 			dbg_printf("replace l2 hash %d\n", hash);
@@ -152,6 +150,8 @@ int compress_dns(uint8_t *pkt, int nbytes, uint8_t sid, int direction) {
 //printf("compress ip len %u\n", len);
 
 	(void) direction;
+	(void) nbytes;
+	(void) sid;
 	tunnel.stats.udp_tx_compressed_pkt++;
 	NewHeader h;
 	set_new_header(pkt, &h);

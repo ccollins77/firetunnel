@@ -212,7 +212,7 @@ void child(int socket) {
 		if (FD_ISSET (tunnel.udpfd, &set)) {
 			int nbytes;
 			struct sockaddr_in client_addr;
-			int socklen = sizeof(client_addr);
+			unsigned socklen = sizeof(client_addr);
 
 			// get data from udp socket
 			nbytes = recvfrom(tunnel.udpfd, udpframe, sizeof(UdpFrame), 0,

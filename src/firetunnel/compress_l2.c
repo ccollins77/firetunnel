@@ -75,7 +75,7 @@ int classify_l2(uint8_t *pkt, uint8_t *sid, int direction) {
 	set_session(pkt, &s);
 
 	uint8_t hash = 0;
-	int i;
+	unsigned i;
 	uint8_t *ptr = (uint8_t *) &s;
 	for ( i = 0; i < sizeof(s); i++, ptr++)
 		hash ^= *ptr;
@@ -94,8 +94,6 @@ int classify_l2(uint8_t *pkt, uint8_t *sid, int direction) {
 				rv = 1;
 			else if (cnt > 3 && cnt % 8)
 				rv = 1;
-			else
-				;
 		}
 		else {
 			dbg_printf("replace l2 hash %d\n", hash);
@@ -114,12 +112,16 @@ int classify_l2(uint8_t *pkt, uint8_t *sid, int direction) {
 }
 
 int compress_l2(uint8_t *pkt, int nbytes, uint8_t sid, int direction) {
+	(void) pkt;
+	(void) nbytes;
+	(void) sid;
 	(void) direction;
 	tunnel.stats.udp_tx_compressed_pkt++;
 	return FULL_HEADER_LEN;
 }
 
 int decompress_l2(uint8_t *pkt, int nbytes, uint8_t sid, int direction) {
+	(void) nbytes;
 	Connection *conn = (direction == S2C)? &connection_s2c[sid]: &connection_c2s[sid];
 	Session *s = &conn->s;
 

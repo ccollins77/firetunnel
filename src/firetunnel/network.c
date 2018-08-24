@@ -291,7 +291,6 @@ int net_udp_server(int port) {
 
 int net_udp_client(void) {
 	int fd;
-	struct sockaddr_in addr;
 
 	if ( (fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 )
 		errExit("socket");

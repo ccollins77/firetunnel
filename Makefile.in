@@ -31,6 +31,7 @@ clean:
 		$(MAKE) -C $$dir clean; \
 	done
 	rm -f $(MANPAGES) $(MANPAGES:%=%.gz) firetunnel*.rpm
+	cd test/compile; ./compile.sh --clean; cd ../..
 
 distclean: clean
 	for dir in $(APPS); do \
@@ -111,7 +112,10 @@ scan-build: clean
 	scan-build make
 
 test-travis:
-	cd test/firetunnel; which firejail; ./firetunnel-travis.sh
+	cd test/firetunnel; which firejail; ./firetunnel-travis.sh |  grep TESTING
 
 test:
 	cd test/firetunnel; ./firetunnle.sh | grep TESTING
+
+test-compile: dist
+	cd test/compile; ./compile.sh $(NAME)-$(VERSION)

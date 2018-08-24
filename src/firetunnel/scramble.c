@@ -54,7 +54,6 @@ static void skytale(uint8_t *in) {
 		uint8_t mask_in = 1;
 		for (i = 0; i < BLOCKLEN; i++, mask_in <<= 1)
 			out[i] |= (*ptr & mask_in) ? mask_out : 0;
-		out[i] ^= 0xc5; // ancient Greek to English translation :)
 	}
 
 	memcpy(in, out, BLOCKLEN);

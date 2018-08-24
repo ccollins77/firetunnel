@@ -55,7 +55,7 @@ void dns_test(const char *server_ip) {
 
 	char buf[MAXBUF];
 	FILE *fp = popen(cmd, "r");
-	if (fgets(buf, MAXBUF, fp) <= 0)
+	if (fgets(buf, MAXBUF, fp) == NULL)
 		goto doexit;
 
 	// store the data

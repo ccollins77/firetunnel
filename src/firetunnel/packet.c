@@ -41,7 +41,7 @@ void pkt_set_header(PacketHeader *header, uint8_t opcode, uint32_t seq)  {
 }
 
 // return 1 if header is good, 0 if bad
-int pkt_check_header(UdpFrame *pkt, int len, struct sockaddr_in *client_addr) {
+int pkt_check_header(UdpFrame *pkt, unsigned len, struct sockaddr_in *client_addr) {
 	assert(pkt);
 	PacketHeader *header = &pkt->header;
 

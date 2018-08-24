@@ -187,8 +187,6 @@ static void parse_args(int argc, char **argv) {
 
 
 int main(int argc, char **argv) {
-	int i;
-
 	// init
 	memset(&tunnel, 0, sizeof(tunnel));
 	compress_init();
@@ -307,9 +305,7 @@ int main(int argc, char **argv) {
 		while (1) {
 			errno = 0;
 			char buf[1024];
-			int n = read(fd[0], buf, sizeof(buf));
-			if (n == -1)
-				errExit("read");
+			unsigned n = read(fd[0], buf, sizeof(buf));
 			if (n == 0) {
 				if (errno == ECHILD)
 					break;

@@ -66,11 +66,12 @@ void switch_user(const char *username) {
 	}
 }
 
+#ifdef HAVE_SECCOMP
 static uint32_t arch_token;	// system architecture as detected by libseccomp
 static const char *proc_id = NULL;
 
 static void trap_handler(int sig, siginfo_t *siginfo, void *ucontext) {
-#ifdef HAVE_SECCOMP
+	(void) ucontext;
 	if (sig == SIGSYS) {
 		char *syscall_name = seccomp_syscall_resolve_num_arch(arch_token, siginfo->si_syscall);
 		if (!syscall_name)
@@ -78,8 +79,8 @@ static void trap_handler(int sig, siginfo_t *siginfo, void *ucontext) {
 		fprintf(stderr, "Error: %s process killed by seccomp - syscall %d (%s)\n", proc_id, siginfo->si_syscall, syscall_name);
 		free(syscall_name);
 	}
-#endif
 }
+#endif
 
 void seccomp(const char *id, const char *str) {
 #ifndef HAVE_SECCOMP

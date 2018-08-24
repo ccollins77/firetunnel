@@ -43,7 +43,7 @@
 ((unsigned) (*((A) + 3)) & 0xff), ((unsigned) (*((A) + 4) & 0xff)), ((unsigned) (*((A) + 5)) & 0xff)
 
 // read an IPv4 address and convert it to uint32_t (host format)
-static inline int atoip(const char *str, uint32_t *ip) {
+inline static int atoip(const char *str, uint32_t *ip) {
 	unsigned a, b, c, d;
 
 	if (sscanf(str, "%u.%u.%u.%u", &a, &b, &c, &d) != 4 || a > 255 || b > 255 || c > 255 || d > 255)
@@ -106,7 +106,7 @@ static inline uint16_t diff_uint16(uint16_t val1, uint16_t val2) {
 	return delta2;
 }
 
-static void inline dbg_memory(void *ptr, int len) {
+static inline void dbg_memory(void *ptr, int len) {
 	const uint8_t *ptr2 = (uint8_t *) ptr;
 	int i;
 	for ( i = 0; i < len; i++) {
@@ -260,7 +260,7 @@ typedef struct tunnel_t {
 	TStats stats;
 } Tunnel;
 
-static inline void reset_stats(Tunnel *t) {
+inline static void reset_stats(Tunnel *t) {
 	memset(&t->stats, 0, sizeof(TStats));
 }
 
@@ -281,7 +281,7 @@ extern int arg_daemonize;	// run as a daemon
 extern int arg_noseccomp;
 
 // packet.c
-static int inline pkt_is_ipv6(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
+static inline int pkt_is_ipv6(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
 	if (nbytes < (14 + 40))	// mac + ipv6 header
 		return 0;
 	if (*(pkt + 12) == 0x86 && *(pkt + 13) == 0xdd) // ipv6 protocol in eth header
@@ -289,7 +289,7 @@ static int inline pkt_is_ipv6(uint8_t *pkt, int nbytes) { // pkt - start of the 
 	return 0;
 }
 
-static int inline pkt_is_arp(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
+static inline int pkt_is_arp(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
 	if (nbytes != (14 + 28))	// mac + arp
 		return 0;
 	if (*(pkt + 12) == 0x08 && *(pkt + 13) == 0x06) // arp protocol in eth header
@@ -297,7 +297,7 @@ static int inline pkt_is_arp(uint8_t *pkt, int nbytes) { // pkt - start of the E
 	return 0;
 }
 
-static int inline pkt_is_dns(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
+static inline int pkt_is_dns(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
 	if (nbytes < (14 + 20 + 8)) // mac + ip + udp
 		return 0;
 	if (*(pkt + 12) == 0x08 && *(pkt + 13) == 0 && // ip protocol
@@ -308,7 +308,7 @@ static int inline pkt_is_dns(uint8_t *pkt, int nbytes) { // pkt - start of the E
 	return 0;
 }
 
-static int inline pkt_is_tcp(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
+static inline int pkt_is_tcp(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
 	if (nbytes < (14 + 20 + 20))	// mac + ip  + tcp
 		return 0;
 	if (*(pkt + 12) == 0x08 && *(pkt + 13) == 0 && // ip protocol
@@ -318,7 +318,7 @@ static int inline pkt_is_tcp(uint8_t *pkt, int nbytes) { // pkt - start of the E
 	return 0;
 }
 
-static int inline pkt_is_udp(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
+static inline int pkt_is_udp(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
 	if (nbytes < (14 + 20 + 8))// mac + ip + udp
 		return 0;
 	if (*(pkt + 12) == 0x08 && *(pkt + 13) == 0 && // ip protocol
@@ -330,7 +330,7 @@ static int inline pkt_is_udp(uint8_t *pkt, int nbytes) { // pkt - start of the E
 
 
 void pkt_set_header(PacketHeader *header, uint8_t opcode, uint32_t seq) ;
-int pkt_check_header(UdpFrame *pkt, int len, struct sockaddr_in *client_addr);
+int pkt_check_header(UdpFrame *pkt, unsigned len, struct sockaddr_in *client_addr);
 void pkt_send_hello(UdpFrame *frame, int udpfd);
 void pkt_print_stats(UdpFrame *frame, int udpfd);
 

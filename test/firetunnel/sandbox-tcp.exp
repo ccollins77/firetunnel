@@ -31,7 +31,7 @@ sleep 1
 
 send -- "wget yahoo.com\r"
 expect {
-	timeout {puts "TESTING ERROR 1\n";exit}
+	timeout {puts "TESTING ERROR 3\n";exit}
 	"saved"
 }
 after 100

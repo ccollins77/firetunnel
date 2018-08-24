@@ -24,56 +24,56 @@ spawn $env(SHELL)
 set sandox_spawn $spawn_id
 send -- "firejail --profile=/run/firetunnel/ftc\r"
 expect {
-	timeout {puts "TESTING ERROR 1\n";exit}
+	timeout {puts "TESTING ERROR 2\n";exit}
 	"Child process initialized"
 }
 sleep 1
 
 send -- "ping -c 1 google.com\r"
 expect {
-	timeout {puts "TESTING ERROR 2\n";exit}
+	timeout {puts "TESTING ERROR 3\n";exit}
 	"1 packets transmitted, 1 received"
 }
 after 100
 
 send -- "ping -c 1 yahoo.com\r"
 expect {
-	timeout {puts "TESTING ERROR 3\n";exit}
+	timeout {puts "TESTING ERROR 4\n";exit}
 	"1 packets transmitted, 1 received"
 }
 after 100
 
 send -- "ping -c 1 reddit.com\r"
 expect {
-	timeout {puts "TESTING ERROR 4\n";exit}
+	timeout {puts "TESTING ERROR 5\n";exit}
 	"1 packets transmitted, 1 received"
 }
 after 100
 
 send -- "ping -c 1 lxer.com\r"
 expect {
-	timeout {puts "TESTING ERROR 5\n";exit}
+	timeout {puts "TESTING ERROR 6\n";exit}
 	"1 packets transmitted, 1 received"
 }
 after 100
 
 send -- "ping -c 1 debian.org\r"
 expect {
-	timeout {puts "TESTING ERROR 6\n";exit}
+	timeout {puts "TESTING ERROR 7\n";exit}
 	"1 packets transmitted, 1 received"
 }
 after 100
 
 send -- "ping -c 1 gentoo.org\r"
 expect {
-	timeout {puts "TESTING ERROR 7\n";exit}
+	timeout {puts "TESTING ERROR 8\n";exit}
 	"1 packets transmitted, 1 received"
 }
 after 100
 
 send -- "ping -c 1 github.com\r"
 expect {
-	timeout {puts "TESTING ERROR 8\n";exit}
+	timeout {puts "TESTING ERROR 9\n";exit}
 	"1 packets transmitted, 1 received"
 }
 after 100

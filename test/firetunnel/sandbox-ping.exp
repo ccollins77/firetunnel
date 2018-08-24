@@ -24,21 +24,21 @@ spawn $env(SHELL)
 set sandox_spawn $spawn_id
 send -- "firejail --profile=/run/firetunnel/ftc\r"
 expect {
-	timeout {puts "TESTING ERROR 1\n";exit}
+	timeout {puts "TESTING ERROR 2\n";exit}
 	"Child process initialized"
 }
 sleep 1
 
 send -- "ping -c 1 10.10.20.1\r"
 expect {
-	timeout {puts "TESTING ERROR 2\n";exit}
+	timeout {puts "TESTING ERROR 3\n";exit}
 	"1 packets transmitted, 1 received"
 }
 after 100
 
 send -- "ping -c 1000 -f 10.10.20.1\r"
 expect {
-	timeout {puts "TESTING ERROR 3\n";exit}
+	timeout {puts "TESTING ERROR 4\n";exit}
 	"1000 packets transmitted, 1000 received"
 }
 after 100

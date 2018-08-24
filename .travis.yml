@@ -3,6 +3,6 @@ dist: trusty
 sudo: true
 
 script:
-  - sudo apt-get -y install expect dnsutils lintian fakeroot
+  - sudo apt-get -y install expect dnsutils lintian fakeroot wget
   - (wget https://github.com/netblue30/firejail/archive/0.9.54.tar.gz && tar -xzvf 0.9.54.tar.gz && cd firejail-0.9.54 && ./configure --prefix=/usr && make && sudo make install)
   - ( ./configure --prefix=/usr --disable-seccomp && make && sudo make install && sudo make test-travis )

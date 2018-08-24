@@ -3,5 +3,5 @@ dist: trusty
 sudo: true
 
 script:
-  - sudo apt-get -y install expect sndutils lintian fakeroot libseccomp-dev
+  - sudo apt-get -y install expect dnsutils lintian fakeroot libseccomp-dev
   - ( ./configure --prefix=/usr && make && sudo make install && sudo make test-travis )

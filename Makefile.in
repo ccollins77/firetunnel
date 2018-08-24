@@ -110,5 +110,5 @@ cppcheck: clean
 scan-build: clean
 	scan-build make
 
-test:
-	cd test; ./test.sh
+test-travis:
+	cd test; ./test.sh | grep TESTING

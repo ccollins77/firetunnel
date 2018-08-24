@@ -111,4 +111,4 @@ scan-build: clean
 	scan-build make
 
 test-travis:
-	cd test; ./test.sh | grep TESTING
+	cd test; ./test.sh

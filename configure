@@ -630,6 +630,7 @@ CPP
 EXTRA_LDFLAGS
 HAVE_GCOV
 HAVE_FATAL_WARNINGS
+HAVE_SECCOMP
 EXTRA_CFLAGS
 RANLIB
 INSTALL_DATA
@@ -684,6 +685,7 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
+enable_seccomp
 enable_fatal_warnings
 enable_gcov
 '
@@ -1316,6 +1318,7 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --disable-seccomp       disable seccomp
   --enable-fatal-warnings -W -Wall -Werror
   --enable-gcov           Gcov instrumentation
 
@@ -3094,6 +3097,21 @@ $as_echo "... not available" >&6; }
 
 fi
 
+
+
+HAVE_SECCOMP=""
+# Check whether --enable-seccomp was given.
+if test "${enable_seccomp+set}" = set; then :
+  enableval=$enable_seccomp;
+fi
+
+if test "x$enable_seccomp" != "xno"; then :
+
+	HAVE_SECCOMP="-DHAVE_SECCOMP"
+	EXTRA_LDFLAGS+=" -lseccomp "
+
+
+fi
 
 HAVE_FATAL_WARNINGS=""
 # Check whether --enable-fatal_warnings was given.

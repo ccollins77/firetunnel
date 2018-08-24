@@ -25,8 +25,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <signal.h>
+#ifdef HAVE_SECCOMP
 #include <seccomp.h>
-
+#endif
 
 void daemonize(void) {
 	if (daemon(0, 1) == -1)
@@ -69,6 +70,7 @@ static uint32_t arch_token;	// system architecture as detected by libseccomp
 static const char *proc_id = NULL;
 
 static void trap_handler(int sig, siginfo_t *siginfo, void *ucontext) {
+#ifdef HAVE_SECCOMP
 	if (sig == SIGSYS) {
 		char *syscall_name = seccomp_syscall_resolve_num_arch(arch_token, siginfo->si_syscall);
 		if (!syscall_name)
@@ -76,9 +78,14 @@ static void trap_handler(int sig, siginfo_t *siginfo, void *ucontext) {
 		fprintf(stderr, "Error: %s process killed by seccomp - syscall %d (%s)\n", proc_id, siginfo->si_syscall, syscall_name);
 		free(syscall_name);
 	}
+#endif
 }
 
 void seccomp(const char *id, const char *str) {
+#ifndef HAVE_SECCOMP
+	(void) id;
+	(void) str;
+#else
 	proc_id = id;
 	char *tmp = strdup(str);
 	if (!tmp)
@@ -120,5 +127,6 @@ void seccomp(const char *id, const char *str) {
 errout:
 	fprintf(stderr, "Warning: cannot initialize seccomp\n");
 	free(tmp);
+#endif
 }
 

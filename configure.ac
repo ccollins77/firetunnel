@@ -34,6 +34,16 @@ AS_IF([test "$HAVE_SPECTRE" = "no"], [
 ])
 AC_SUBST([EXTRA_CFLAGS])
 
+
+HAVE_SECCOMP=""
+AC_ARG_ENABLE([seccomp],
+    AS_HELP_STRING([--disable-seccomp], [disable seccomp]))
+AS_IF([test "x$enable_seccomp" != "xno"], [
+	HAVE_SECCOMP="-DHAVE_SECCOMP"
+	EXTRA_LDFLAGS+=" -lseccomp "
+	AC_SUBST(HAVE_SECCOMP)
+])
+
 HAVE_FATAL_WARNINGS=""
 AC_ARG_ENABLE([fatal_warnings],
     AS_HELP_STRING([--enable-fatal-warnings], [-W -Wall -Werror]))

@@ -10,14 +10,15 @@ VERSION=@PACKAGE_VERSION@
 NAME=@PACKAGE_NAME@
 HAVE_FATAL_WARNINGS=@HAVE_FATAL_WARNINGS@
 HAVE_GCOV=@HAVE_GCOV@
+HAVE_SECCOMP=@HAVE_SECCOMP@
 
 H_FILE_LIST       = $(sort $(wildcard *.[h]))
 C_FILE_LIST       = $(sort $(wildcard *.c))
 OBJS = $(C_FILE_LIST:.c=.o)
 BINOBJS =  $(foreach file, $(OBJS), $file)
 
-CFLAGS += -ggdb $(HAVE_FATAL_WARNINGS) -O2 -DVERSION='"$(VERSION)"'  $(HAVE_GCOV) -DPREFIX='"$(prefix)"'  -DSYSCONFDIR='"$(sysconfdir)/firetunnel"' -DLIBDIR='"$(libdir)"' -fstack-protector-all -D_FORTIFY_SOURCE=2 -fPIE -pie -Wformat -Wformat-security
-LDFLAGS += -pie -Wl,-z,relro -Wl,-z,now -lpthread -lseccomp
+CFLAGS += -ggdb $(HAVE_FATAL_WARNINGS) -O2 -DVERSION='"$(VERSION)"'  $(HAVE_GCOV) $(HAVE_SECCOMP) -DPREFIX='"$(prefix)"'  -DSYSCONFDIR='"$(sysconfdir)/firetunnel"' -DLIBDIR='"$(libdir)"' -fstack-protector-all -D_FORTIFY_SOURCE=2 -fPIE -pie -Wformat -Wformat-security
+LDFLAGS += -pie -Wl,-z,relro -Wl,-z,now -lpthread
 EXTRA_LDFLAGS +=@EXTRA_LDFLAGS@
 EXTRA_CFLAGS +=@EXTRA_CFLAGS@
 

@@ -111,4 +111,7 @@ scan-build: clean
 	scan-build make
 
 test-travis:
-	cd test; ./test.sh
+	cd test/firetunnel; ./firetunnel-travis.sh | grep TESTING
+
+test:
+	cd test/firetunnel; ./firetunnle.sh | grep TESTING

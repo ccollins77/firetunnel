@@ -6,6 +6,8 @@
 export MALLOC_CHECK_=3
 export MALLOC_PERTURB_=$(($RANDOM % 255 + 1))
 
+echo "abcdefg" > /etc/firetunnel/firetunnel.secret
+
 echo "TESTING: server startup (test/server-startup.exp)"
 ./server-startup.exp
 

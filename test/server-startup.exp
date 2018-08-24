@@ -1,0 +1,33 @@
+#!/usr/bin/expect -f
+# This file is part of Firetunnel project
+# Copyright (C) 2018 Firetunnel Authors
+# License GPL v2
+
+set timeout 10
+spawn $env(SHELL)
+match_max 100000
+
+send -- "firetunnel --server\r"
+expect {
+	timeout {puts "TESTING ERROR 1\n";exit}
+	"DNS server 1.1.1.1 response time"
+}
+expect {
+	timeout {puts "TESTING ERROR 2\n";exit}
+	"DNS server 8.26.56.26 response time"
+}
+expect {
+	timeout {puts "TESTING ERROR 2\n";exit}
+	"NAT configured on interface"
+}
+after 100
+
+spawn $env(SHELL)
+send -- "firetunnel --server\r"
+expect {
+	timeout {puts "TESTING ERROR 1\n";exit}
+	"DNS server 1.1.1.1 response time"
+}
+
+
+puts "\nall done\n"

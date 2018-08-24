@@ -1,0 +1,46 @@
+#!/usr/bin/expect -f
+# This file is part of Firetunnel project
+# Copyright (C) 2018 Firetunnel Authors
+# License GPL v2
+
+set timeout 10
+spawn $env(SHELL)
+match_max 100000
+
+send -- "firetunnel --server\r"
+set server_spawn $spawn_id
+after 100
+
+spawn $env(SHELL)
+set client_spawn $spawn_id
+send -- "firetunnel\r"
+expect {
+	timeout {puts "TESTING ERROR 1\n";exit}
+	"/run/firetunnel/ftc updated"
+}
+sleep 1
+
+spawn $env(SHELL)
+set sandox_spawn $spawn_id
+send -- "firejail --profile=/run/firetunnel/ftc\r"
+expect {
+	timeout {puts "TESTING ERROR 1\n";exit}
+	"Child process initialized"
+}
+sleep 1
+
+send -- "ping -c 1 10.10.20.1\r"
+expect {
+	timeout {puts "TESTING ERROR 2\n";exit}
+	"1 packets transmitted, 1 received"
+}
+after 100
+
+send -- "ping -c 1000 -f 10.10.20.1\r"
+expect {
+	timeout {puts "TESTING ERROR 3\n";exit}
+	"1000 packets transmitted, 1000 received"
+}
+after 100
+
+puts "\nall done\n"

@@ -110,4 +110,5 @@ cppcheck: clean
 scan-build: clean
 	scan-build make
 
-
+test:
+	cd test; su -c ./test.sh

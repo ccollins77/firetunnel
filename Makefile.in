@@ -114,8 +114,10 @@ scan-build: clean
 test-travis:
 	cd test/firetunnel; which firejail; ./firetunnel-travis.sh |  grep TESTING
 
-test:
-	cd test/firetunnel; ./firetunnle.sh | grep TESTING
+test-firetunnel:
+	cd test/firetunnel; sudo ./firetunnel.sh | grep TESTING
 
 test-compile: dist
 	cd test/compile; ./compile.sh $(NAME)-$(VERSION)
+
+test: test-compile test-firetunnel

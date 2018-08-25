@@ -14,10 +14,16 @@ echo "TESTING: server startup (test/server-startup.exp)"
 echo "TESTING: connect (test/connect.exp)"
 ./connect.exp
 
+echo "TESTING: connect custom overlay (test/connect-addr.exp)"
+./connect-addr.exp
+
 echo "TESTING: disconnect (test/disconnect.exp - it will take a about 1 minute to run)"
 ./disconnect.exp
 
+echo "TESTING: multiple clients (test/multiple-clients.exp)"
+./multiple-clients.exp
+
 # somehow sandbox-*.exp programs won't work on Travis CI
-# installing a firejail instance int.travis.yml:
+# installing a firejail instance in .travis.yml:
 #  - (wget https://github.com/netblue30/firejail/archive/0.9.56-rc1.tar.gz && tar -xzvf 0.9.56-rc1.tar.gz  && cd firejail-0.9.56-rc1 && ./configure --prefix=/usr && make && sudo make install)
 

@@ -94,3 +94,5 @@ echo
 echo  "Legend:"
 echo ${arr[1]}
 echo ${arr[2]}
+echo
+echo

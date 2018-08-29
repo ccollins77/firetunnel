@@ -48,7 +48,7 @@ void net_if_up(const char *ifname) {
 	// get the existing interface flags
 	struct ifreq ifr;
 	memset(&ifr, 0, sizeof(ifr));
-	strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
+	strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
 	ifr.ifr_addr.sa_family = AF_INET;
 
 	// read the existing flags
@@ -91,7 +91,7 @@ void net_if_ip(const char *ifname, uint32_t ip, uint32_t mask, int mtu) {
 
 	struct ifreq ifr;
 	memset(&ifr, 0, sizeof(ifr));
-	strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
+	strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
 	ifr.ifr_addr.sa_family = AF_INET;
 
 	((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr = htonl(ip);
@@ -131,7 +131,7 @@ void net_set_mtu(const char *ifname, int mtu) {
 
 	memset(&ifr, 0, sizeof(ifr));
 	ifr.ifr_addr.sa_family = AF_INET;
-	strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
+	strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
 	ifr.ifr_mtu = mtu;
 	if (ioctl(s, SIOCSIFMTU, (caddr_t)&ifr) != 0) {
 		fprintf(stderr, "Warning: cannot set mtu %d for interface %s\n", mtu, ifname);
@@ -152,7 +152,7 @@ int net_get_mtu(const char *ifname) {
 
 	memset(&ifr, 0, sizeof(ifr));
 	ifr.ifr_addr.sa_family = AF_INET;
-	strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
+	strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
 	if (ioctl(s, SIOCGIFMTU, (caddr_t)&ifr) == 0)
 		mtu = ifr.ifr_mtu;
 	close(s);
@@ -179,7 +179,8 @@ int net_add_bridge(const char *ifname) {
 #endif
 	{
 		char br[IFNAMSIZ];
-		strncpy(br, ifname, IFNAMSIZ);
+		memset(br, 0, sizeof(br));
+		strncpy(br, ifname, IFNAMSIZ - 1);
 		unsigned long arg[3] = {BRCTL_ADD_BRIDGE, (unsigned long) br, 0};
 		rv = ioctl(fd, SIOCSIFBR, arg);
 	}
@@ -218,7 +219,7 @@ void net_bridge_add_interface(const char *bridge, const char *dev) {
               	errExit("socket");
 
 	memset(&ifr, 0, sizeof(ifr));
-	strncpy(ifr.ifr_name, bridge, IFNAMSIZ);
+	strncpy(ifr.ifr_name, bridge, IFNAMSIZ - 1);
 #ifdef SIOCBRADDIF
 	ifr.ifr_ifindex = ifindex;
 	err = ioctl(sock, SIOCBRADDIF, &ifr);
@@ -255,7 +256,7 @@ int net_tap_open(char *devname) {
 		errExit("ioctl TUNSETIFF");
 
 	// extract device name
-	memcpy(devname,  ifr.ifr_name, IFNAMSIZ);
+	memcpy(devname,  ifr.ifr_name, IFNAMSIZ - 1);
 
 	// persistent device
 //	if(ioctl(fd, TUNSETPERSIST, 1) < 0)

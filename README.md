@@ -66,9 +66,8 @@ $ ./configure && make && sudo make install-strip
 <br><br>
 ![network diagram](drawing2.png)
 
-You need two computers, one for the client and one for the server.
-The time needs to be synchronized between them in a 10 second window.
-This should not be a problem, by default most Linux distributions are running the NTP daemon.
+The server and the client must have the time synchronized within 10 seconds.
+This shouldn't be a problem, by default most Linux distributions are running the NTP daemon.
 Start by setting a common secret file in /etc/firetunnel/firetunnel.secret:
 `````
 # cp summer.jpg /etc/firetunnel/firetunnel.secret

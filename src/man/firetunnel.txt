@@ -59,9 +59,8 @@ The server also handles DNS. In /etc/firetunnel/firetunnel.config we list 8 publ
 such as 1.1.1.1 and 9.9.9.9. At startup we test each one of them and pick up the fastest ones.
 .PP
 .SH USAGE
-You need two computers, one for the client and one for the server.
-The time needs to be synchronized between them in a 30 second window.
-This should not be a problem, by default most Linux distributions are running an NTP daemon.
+The server and the client must have the time synchronized within 10 seconds.
+This shouldn't be a problem, by default most Linux distributions are running the NTP daemon.
 Start by setting a common secret file in /etc/firetunnel/firetunnel.secret:
 .PP
 .RS

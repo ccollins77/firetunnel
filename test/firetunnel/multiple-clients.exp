@@ -1,0 +1,69 @@
+#!/usr/bin/expect -f
+# This file is part of Firetunnel project
+# Copyright (C) 2018 Firetunnel Authors
+# License GPL v2
+
+set timeout 10
+spawn $env(SHELL)
+match_max 100000
+
+set server1_spawn $spawn_id
+send -- "firetunnel --server --port=5000\r"
+expect {
+	timeout {puts "TESTING ERROR 1\n";exit}
+	"NAT configured"
+}
+after 100
+
+spawn $env(SHELL)
+set server2_spawn $spawn_id
+send -- "firetunnel --server --port=5001\r"
+expect {
+	timeout {puts "TESTING ERROR 2\n";exit}
+	"NAT configured"
+}
+after 100
+
+spawn $env(SHELL)
+set client1_spawn $spawn_id
+send -- "firetunnel --port=5000\r"
+expect {
+	timeout {puts "TESTING ERROR 3\n";exit}
+	"/run/firetunnel/ftc updated"
+}
+after 100
+
+spawn $env(SHELL)
+set client2_spawn $spawn_id
+send -- "firetunnel --port=5001 --bridge=ftc2\r"
+expect {
+	timeout {puts "TESTING ERROR 4\n";exit}
+	"/run/firetunnel/ftc2 updated"
+}
+after 100
+
+spawn $env(SHELL)
+set shell_spawn $spawn_id
+send -- "cat /run/firetunnel/ftc\r"
+expect {
+	timeout {puts "TESTING ERROR 5\n";exit}
+	"net ftc"
+}
+expect {
+	timeout {puts "TESTING ERROR 6\n";exit}
+	"defaultgw 10.10.20.1"
+}
+after 100
+
+send -- "cat /run/firetunnel/ftc2\r"
+expect {
+	timeout {puts "TESTING ERROR 7\n";exit}
+	"net ftc2"
+}
+expect {
+	timeout {puts "TESTING ERROR 8\n";exit}
+	"defaultgw 10.10.20.1"
+}
+after 100
+
+puts "\nall done\n"

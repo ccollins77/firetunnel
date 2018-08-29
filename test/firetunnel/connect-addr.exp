@@ -1,0 +1,52 @@
+#!/usr/bin/expect -f
+# This file is part of Firetunnel project
+# Copyright (C) 2018 Firetunnel Authors
+# License GPL v2
+
+set timeout 10
+spawn $env(SHELL)
+match_max 100000
+
+send -- "firetunnel --server --netaddr=172.16.0.0 --netmask=255.240.0.0 --defaultgw=172.16.0.1 --mtu=1399 --port=5000\r"
+set server_spawn $spawn_id
+after 100
+
+spawn $env(SHELL)
+set client_spawn $spawn_id
+send -- "firetunnel --port=5000\r"
+expect {
+	timeout {puts "TESTING ERROR 1\n";exit}
+	"0.0.0.0:5000 connected"
+}
+expect {
+	timeout {puts "TESTING ERROR 2\n";exit}
+	"Tunnel: 172.16.0.0/12, default gw 172.16.0.1, mtu 1399"
+}
+expect {
+	timeout {puts "TESTING ERROR 3\n";exit}
+	"Tunnel: DNS"
+}
+expect {
+	timeout {puts "TESTING ERROR 4\n";exit}
+	"/run/firetunnel/ftc updated"
+}
+
+after 100
+
+spawn $env(SHELL)
+set shell_spawn $spawn_id
+send -- "cat /run/firetunnel/ftc\r"
+expect {
+	timeout {puts "TESTING ERROR 1\n";exit}
+	"netmask 255.240.0.0"
+}
+expect {
+	timeout {puts "TESTING ERROR 1\n";exit}
+	"defaultgw 172.16.0.1"
+}
+expect {
+	timeout {puts "TESTING ERROR 1\n";exit}
+	"mtu 1399"
+}
+
+puts "\nall done\n"

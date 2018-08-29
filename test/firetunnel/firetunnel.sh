@@ -12,8 +12,14 @@ echo "TESTING: server startup (test/server-startup.exp)"
 echo "TESTING: connect (test/connect.exp)"
 ./connect.exp
 
+echo "TESTING: connect custom overlay (test/connect-addr.exp)"
+./connect-addr.exp
+
 echo "TESTING: disconnect (test/disconnect.exp - it will take a about 1 minute to run)"
 ./disconnect.exp
+
+echo "TESTING: multiple clients (test/multiple-clients.exp)"
+./multiple-clients.exp
 
 echo "TESTING: sandbox ping (test/sandbox-ping.exp)"
 ./sandbox-ping.exp

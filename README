@@ -5,9 +5,9 @@ License: GPL v2
 
 Project Description:
 
-   Firetunnel  is a simple program for connecting multiple Firejail sandboxes
-   on a virtualized Ethernet network. Applications  include  virtual private
-   networks (VPN), overlay networks, peer-to-peer applications.
+   Firetunnel  is a free and open-source program for connecting multiple Firejail
+   sandboxes on a virtualized Ethernet network. Applications  include  virtual
+   private networks (VPN), overlay networks, peer-to-peer applications.
 
    The  tunnel encapsulates Ethernet frames in UDP packets. Each packet is
    authenticated independently with  BLAKE2  cryptographic  hash  function

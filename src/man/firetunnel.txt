@@ -20,14 +20,13 @@ Start your Firejail sandboxes (on both client and server side):
 firejail --tunnel application
 .RE
 .SH DESCRIPTION
-Firetunnel is a simple program for connecting multiple Firejail sandboxes
+Firetunnel is a free and open-source program for connecting multiple Firejail sandboxes
 on a virtualized Ethernet network. Applications include
 virtual private networks (VPN), overlay networks, peer-to-peer applications.
 .PP
 The tunnel encapsulates Ethernet frames in UDP packets. Each packet is authenticated
 independently with BLAKE2 cryptographic hash function (https://blake2.net/).
-The keys are derived from a common secret file
-installed on both client and server.
+The keys are derived from a common secret file installed on both client and server.
 .PP
 The traffic is not encrypted. On Linux, several excellent programs are already
 providing military-grade encryption. Among them OpenVPN, stunnel, Wireguard.
@@ -67,8 +66,8 @@ Start by setting a common secret file in /etc/firetunnel/firetunnel.secret:
 # cp summer.jpg /etc/firetunnel/firetunnel.secret
 .RE
 .PP
-Any file will do as long as the same file is installed on both computers. You also need to configure
-the access permissions:
+Any file will do as long as the same file is installed on both computers.
+We recommend you configure the access permissions as follows:
 .PP
 .RS
 # chmod 600 /etc/firetunnel/firetunnel.secret
@@ -87,6 +86,7 @@ In a different terminal on your home computer start the client:
 .RE
 .PP
 198.51.100.23 is in this example the remote server IP address.
+By default we are using UDP port 1119.
 In a few seconds you will see the client connecting and receiving the tunnel configuration:
 .PP
 .RS
@@ -99,7 +99,7 @@ In a few seconds you will see the client connecting and receiving the tunnel con
 .RE
 .PP
 All the commands above are entered as root. Time to switch back to your regular user
-and start a few sandboxes on your client computer:
+and start a few sandboxes:
 .PP
 .RS
 $ firejail --tunnel firefox &
@@ -124,8 +124,7 @@ Without this option, the default server bridge device is \fBfts\fR, and the clie
 
 .TP
 \fB\-\-daemonize
-Detach from the controlling terminal and run as a Unix daemon. Only stdin
-is redirected to /dev/null.
+Detach from the controlling terminal and run as a Unix daemon.
 
 .TP
 \fB\-\-debug

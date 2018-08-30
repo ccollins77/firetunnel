@@ -30,20 +30,8 @@
 #endif
 
 void daemonize(void) {
-	if (daemon(0, 1) == -1)
+	if (daemon(0, 0) == -1)
 		errExit("daemon");
-
-	// close stdin
-	int fd = open("/dev/null", O_RDWR, 0);
-	if (fd == -1)
-		goto errout;
-
-	if(dup2(fd, STDIN_FILENO) < 0)\
-		goto errout;
-	return;
-
-errout:
-	fprintf(stderr, "Warning: cannot close stdin, /dev/null not found\n");
 }
 
 void switch_user(const char *username) {

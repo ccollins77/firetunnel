@@ -1,0 +1,13 @@
+Package: firetunnel
+Version: FIRETUNNELVER-1
+Architecture: amd64
+Maintainer: netblue30 <netblue30@yahoo.com>
+Installed-Size: 276
+Depends: libc6, libseccomp2, dnsutils
+Section: admin
+Priority: optional
+Homepage: https://github.com/netblue30/firejail
+Description: Tunneling program for Firejail sandboxes.
+ Firetunnel  is a free and open-source program for connecting multiple Firejail
+ sandboxes on a virtualized Ethernet network. Applications  include  virtual
+ private networks (VPN), overlay networks, peer-to-peer applications.

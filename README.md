@@ -1,6 +1,6 @@
 # Firetunnel
 
-Firetunnel is a simple program for connecting multiple Firejail sandboxes
+Firetunnel is a free and open-source program for connecting multiple Firejail sandboxes
 on a virtualized Ethernet network. Applications include
 virtual private networks (VPN), overlay networks, peer-to-peer applications.
 
@@ -22,6 +22,12 @@ Everything is integrated seamlessly with Firejail.
 
 ## Features
 
+* Fast and easy to use.
+
+* Runs on any Linux system with a kernel 3.5 or newer.
+
+* Minimal attack surface, seccomp support.
+
 * Ethernet transport over UDP.
 
 * Strong built-in authentication system based on Blake2 hash function.
@@ -37,12 +43,6 @@ Everything is integrated seamlessly with Firejail.
 * Network address translation in the firewall on the server side.
 
 * Automatic network configuration for client and sandboxes based on RFC 5227 and our tunnel configuration protocol.
-
-* Runs on any Linux system with a kernel 3.5 or newer.
-
-* Minimal attack surface, seccomp support.
-
-* Fast and easy to use.
 
 * License: GPLv2
 <br><br>
@@ -73,7 +73,8 @@ Start by setting a common secret file in /etc/firetunnel/firetunnel.secret:
 # cp summer.jpg /etc/firetunnel/firetunnel.secret
 `````
 
-Any file will do as long as the same file is installed on both computers. You also need to configure the access permissions:
+Any file will do as long as the same file is installed on both computers.
+\We recommend you configure the access permissions as follows:
 `````
 # chmod 600 /etc/firetunnel/firetunnel.secret
 `````
@@ -85,7 +86,7 @@ In a different terminal on your home computer start the client:
 `````
 # firetunnel 198.51.100.23
 `````
-198.51.100.23 is in this example the remote server IP address.
+198.51.100.23 is in this example the remote server IP address. By default we are using UDP port 1119.
 In a few seconds you will see the client connecting and receiving the tunnel configuration:
 `````
 2018-08-01 21:09:01 198.51.100.23:1119 connected
@@ -93,12 +94,13 @@ In a few seconds you will see the client connecting and receiving the tunnel con
 2018-08-01 21:09:01 Tunnel: DNS 1.1.1.1, 208.67.222.222, 9.9.9.9
 `````
 All the commands above are entered as root. Time to switch back to your regular user
-and start a few sandboxes on your client computer:
+and start a few sandboxes:
 `````
 $ firejail --tunnel firefox &
 $ firejail --tunnel transmission-qt &
 `````
-Multiple clients can be connected to the same server machine, this is an example:
+Multiple clients can connect to the same server machine. For each client we start an independent server. All the servers
+are using the same bridge device, basically joining the client networks. Example:
 <br><br>
 <br><br>
 ![network diagram](drawing4.png)

@@ -61,11 +61,13 @@ static const char *proc_id = NULL;
 static void trap_handler(int sig, siginfo_t *siginfo, void *ucontext) {
 	(void) ucontext;
 	if (sig == SIGSYS) {
+		fprintf(stderr, "Error: %s process killed by seccomp - syscall %d", proc_id, siginfo->si_syscall);
 		char *syscall_name = seccomp_syscall_resolve_num_arch(arch_token, siginfo->si_syscall);
-		if (!syscall_name)
-			syscall_name = "UNKNOWN";
-		fprintf(stderr, "Error: %s process killed by seccomp - syscall %d (%s)\n", proc_id, siginfo->si_syscall, syscall_name);
-		free(syscall_name);
+		if (syscall_name)
+			fprintf(stderr, " (%s)", syscall_name);
+			free(syscall_name);
+		}
+		fprintf(stderr, "\n");
 	}
 }
 #endif
@@ -93,17 +95,13 @@ void seccomp(const char *id, const char *str) {
 		fprintf(stderr, "Warning: cannot handle sigaction/SIGSYS\n");
 
 	int rc = 0;
-	char *syscall = strtok(tmp, ",");
 	while(syscall) {
 		if (seccomp_rule_add(ctx, SCMP_ACT_ALLOW, seccomp_syscall_resolve_name(syscall), 0) == -1)
 			fprintf(stderr, "Warning: syscall %s not added\n", syscall);
 		syscall = strtok(NULL, ",");
 	}
 
-	if (rc)
-		goto errout;
-
-	rc = seccomp_load(ctx);
+	int rc = seccomp_load(ctx);
 //seccomp_export_bpf(ctx, STDOUT_FILENO);
 //seccomp_export_pfc(ctx, STDOUT_FILENO);
 //	seccomp_release(ctx);

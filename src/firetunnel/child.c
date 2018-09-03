@@ -44,9 +44,9 @@ void child(int socket) {
 
 	// init packet storage
 	PacketMem *pktmem = malloc(sizeof(PacketMem));
-	memset(pktmem, 0, sizeof(PacketMem));
 	if (!pktmem)
 		errExit("malloc");
+	memset(pktmem, 0, sizeof(PacketMem));
 	UdpFrame *udpframe = &pktmem->f;
 	int hlen = sizeof(PacketHeader);
 

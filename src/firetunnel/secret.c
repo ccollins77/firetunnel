@@ -31,12 +31,6 @@ uint8_t extra_key[KEY_LEN];
 
 void init_keys(uint16_t port) {
 	// open SECRET_FILE and read it
-	struct stat s;
-	if (stat(SECRET_FILE, &s)) {
-		fprintf(stderr, "Error: cannot find %s\n", SECRET_FILE);
-		exit(1);
-	}
-
 	int fd = open(SECRET_FILE, O_RDONLY);
 	if (fd == -1) {
 		fprintf(stderr, "Error: cannot open %s\n", SECRET_FILE);

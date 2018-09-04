@@ -35,12 +35,12 @@
 
 // macro to print ip addresses in a printf statement
 #define PRINT_IP(A) \
-((int) (((A) >> 24) & 0xFF)),  ((int) (((A) >> 16) & 0xFF)), ((int) (((A) >> 8) & 0xFF)), ((int) ( (A) & 0xFF))
+	((int) (((A) >> 24) & 0xFF)),  ((int) (((A) >> 16) & 0xFF)), ((int) (((A) >> 8) & 0xFF)), ((int) ( (A) & 0xFF))
 
 // macro to print a mac addresses in a printf statement
 #define PRINT_MAC(A) \
-((unsigned) (*(A)) & 0xff), ((unsigned) (*((A) + 1) & 0xff)), ((unsigned) (*((A) + 2) & 0xff)), \
-((unsigned) (*((A) + 3)) & 0xff), ((unsigned) (*((A) + 4) & 0xff)), ((unsigned) (*((A) + 5)) & 0xff)
+	((unsigned) (*(A)) & 0xff), ((unsigned) (*((A) + 1) & 0xff)), ((unsigned) (*((A) + 2) & 0xff)), \
+	((unsigned) (*((A) + 3)) & 0xff), ((unsigned) (*((A) + 4) & 0xff)), ((unsigned) (*((A) + 5)) & 0xff)
 
 // read an IPv4 address and convert it to uint32_t (host format)
 inline static int atoip(const char *str, uint32_t *ip) {
@@ -122,12 +122,13 @@ static inline void dbg_memory(void *ptr, int len) {
 }
 
 extern int arg_debug;
+extern int arg_debug_compress;
 static inline void dbg_printf(char *fmt, ...) {
 	if (!arg_debug)
 		return;
 
 	va_list args;
-	va_start(args,fmt);
+	va_start(args, fmt);
 	vfprintf(stderr, fmt, args);
 	va_end(args);
 }
@@ -165,7 +166,7 @@ static inline void dbg_printf(char *fmt, ...) {
 // BLAKE2 configuration
 #define SECRET_FILE (SYSCONFDIR "/firetunnel.secret")	// use this file to generate a huge (KEY_MAX) list of keys
 #define KEY_LEN 16		// BLAKE2-128 (16 byte key/result)
-			// this is equivalent to a regular HMAC-MD5/HMAC-SHA1, but faster and  cryptographically stronger
+// this is equivalent to a regular HMAC-MD5/HMAC-SHA1, but faster and  cryptographically stronger
 #define KEY_MAX SEQ_DELTA_MAX	// maximum number of keys  in the list
 
 // udp packet structure:    | ip/udp transport | tunnel header | Ethernet frame | padding | BLACKE2 hash (16/32/64 bytes) |
@@ -298,22 +299,37 @@ static inline int pkt_is_arp(uint8_t *pkt, int nbytes) { // pkt - start of the E
 }
 
 static inline int pkt_is_dns(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
-	if (nbytes < (14 + 20 + 8)) // mac + ip + udp
+	if (nbytes < (14 + 20 + 8 + 4)) // mac + ip + udp + dns (2 tid, 2 flags)
 		return 0;
 	if (*(pkt + 12) == 0x08 && *(pkt + 13) == 0 && // ip protocol
-	    *(pkt + 23) == 0x11 && // udp protocol
+	    * (pkt + 23) == 0x11 && // udp protocol
 	    ((*(pkt + 34) == 0 && *(pkt + 35) == 0x35) || (*(pkt + 36) == 0 && *(pkt + 37) == 0x35))) // dns port
-	    	return 1;
+		return 1;
 
 	return 0;
 }
+
+#if 0
+static inline int pkt_is_dns_AAAA(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
+
+	if (nbytes < (14 + 20 + 8)) // mac + ip + udp + dns (2 tid, 2 flags)
+		return 0;
+	if (*(pkt + 12) == 0x08 && *(pkt + 13) == 0 && // ip protocol
+	    * (pkt + 23) == 0x11 && // udp protocol
+	    ((*(pkt + 34) == 0 && *(pkt + 35) == 0x35) || (*(pkt + 36) == 0 && *(pkt + 37) == 0x35)) && // dns port
+	    ((*(pkt + 45) & 0x80) == 0) // DNS query
+		return 1;
+
+	return 0;
+}
+#endif
 
 static inline int pkt_is_tcp(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
 	if (nbytes < (14 + 20 + 20))	// mac + ip  + tcp
 		return 0;
 	if (*(pkt + 12) == 0x08 && *(pkt + 13) == 0 && // ip protocol
-	    *(pkt + 23) == 6) // tcp
-	    	return 1;
+	    * (pkt + 23) == 6) // tcp
+		return 1;
 
 	return 0;
 }
@@ -322,8 +338,8 @@ static inline int pkt_is_udp(uint8_t *pkt, int nbytes) { // pkt - start of the E
 	if (nbytes < (14 + 20 + 8))// mac + ip + udp
 		return 0;
 	if (*(pkt + 12) == 0x08 && *(pkt + 13) == 0 && // ip protocol
-	    *(pkt + 23) == 17) // udp
-	    	return 1;
+	    * (pkt + 23) == 17) // udp
+		return 1;
 
 	return 0;
 }

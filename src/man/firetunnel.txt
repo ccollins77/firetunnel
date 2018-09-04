@@ -128,7 +128,11 @@ Detach from the controlling terminal and run as a Unix daemon.
 
 .TP
 \fB\-\-debug
-Print debug information
+Print debug information.
+
+.TP
+\fB\-\-debug-compress
+Print debug information for header compression subsystem.
 
 .TP
 \fB\-\-defaultgw=address

@@ -63,7 +63,7 @@ static void trap_handler(int sig, siginfo_t *siginfo, void *ucontext) {
 	if (sig == SIGSYS) {
 		fprintf(stderr, "Error: %s process killed by seccomp - syscall %d", proc_id, siginfo->si_syscall);
 		char *syscall_name = seccomp_syscall_resolve_num_arch(arch_token, siginfo->si_syscall);
-		if (syscall_name)
+		if (syscall_name) {
 			fprintf(stderr, " (%s)", syscall_name);
 			free(syscall_name);
 		}
@@ -94,7 +94,7 @@ void seccomp(const char *id, const char *str) {
 	if (sigaction(SIGSYS, &sa, NULL) == -1)
 		fprintf(stderr, "Warning: cannot handle sigaction/SIGSYS\n");
 
-	int rc = 0;
+	char *syscall = strtok(tmp, ",");
 	while(syscall) {
 		if (seccomp_rule_add(ctx, SCMP_ACT_ALLOW, seccomp_syscall_resolve_name(syscall), 0) == -1)
 			fprintf(stderr, "Warning: syscall %s not added\n", syscall);

@@ -110,15 +110,16 @@ void child(int socket) {
 				pkt_print_stats(udpframe, tunnel.udpfd);
 			}
 
-//			if (arg_debug) {
-				if (++compresscnt >= COMPRESS_TIMEOUT_MAX) {
-					compresscnt = 0;
+			if (++compresscnt >= COMPRESS_TIMEOUT_MAX) {
+				compresscnt = 0;
+				if (arg_debug || arg_debug_compress) {
 					int direction = (arg_server)? S2C: C2S;
 					print_compress_table(direction);
 					print_compress_l2_table(direction);
 					print_compress_dns_table(direction);
 				}
-//			}
+			}
+
 			continue;
 		}
 
@@ -139,6 +140,8 @@ void child(int socket) {
 				dbg_printf("error not connected\n");
 			else if (pkt_is_ipv6(udpframe->eth, nbytes))
 				dbg_printf("ipv6 drop\n");
+//			else if (pkt_is_dns_AAAA(udpframe->eth, nbytes)
+//				dbg_printf("DNS AAAA drop\n");
 			else {
 				int compression = 0;
 				int compression_l2 = 0;

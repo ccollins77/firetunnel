@@ -31,6 +31,7 @@ int arg_noseccomp = 0;
 int arg_nonat = 0;
 int arg_daemonize = 0;
 int arg_debug = 0;
+int arg_debug_compress = 0;
 
 Tunnel tunnel;
 static pid_t child_pid = 0;
@@ -79,6 +80,8 @@ static void parse_args(int argc, char **argv) {
 			break;
 		else if (strcmp(argv[i], "--debug") == 0)
 			arg_debug = 1;
+		else if (strcmp(argv[i], "--debug-compress") == 0)
+			arg_debug_compress = 1;
 		else if (strcmp(argv[i], "--server") == 0)
 			arg_server = 1;
 		else if (strncmp(argv[i], "--port=",  7) == 0) {

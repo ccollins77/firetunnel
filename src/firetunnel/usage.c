@@ -29,7 +29,7 @@ void usage(void) {
 	printf("   --bridge=device - use this Linux bridge device\n");
 	printf("   --daemonize - detach from the controlling terminal and run as a Unix\n");
 	printf("\tdaemon\n");
-	printf("   --debug - print debug information\n");
+	printf("   --debug, --debug-compress - print debug information\n");
 	printf("   --defaultgw=address - tunnel default gateway address, default 10.10.20.1\n");
 	printf("   --dns=address - add this DNS server to the list of servers\n");
 	printf("   --help, ? - this help screen\n");

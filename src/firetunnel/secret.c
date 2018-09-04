@@ -37,6 +37,12 @@ void init_keys(uint16_t port) {
 		exit(1);
 	}
 
+	struct stat s;
+	if (fstat(fd, &s)) {
+		fprintf(stderr, "Error: cannot find %s\n", SECRET_FILE);
+		exit(1);
+	}
+
 	uint8_t *data = mmap(0, s.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 	if (data == MAP_FAILED) {
 		fprintf(stderr, "Error: cannot read %s\n", SECRET_FILE);

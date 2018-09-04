@@ -299,7 +299,7 @@ static inline int pkt_is_arp(uint8_t *pkt, int nbytes) { // pkt - start of the E
 }
 
 static inline int pkt_is_dns(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
-	if (nbytes < (14 + 20 + 8 + 4)) // mac + ip + udp + dns (2 tid, 2 flags)
+	if (nbytes < (14 + 20 + 8 + 12)) // mac + ip + udp + dns
 		return 0;
 	if (*(pkt + 12) == 0x08 && *(pkt + 13) == 0 && // ip protocol
 	    * (pkt + 23) == 0x11 && // udp protocol
@@ -309,20 +309,38 @@ static inline int pkt_is_dns(uint8_t *pkt, int nbytes) { // pkt - start of the E
 	return 0;
 }
 
-#if 0
+
 static inline int pkt_is_dns_AAAA(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
 
-	if (nbytes < (14 + 20 + 8)) // mac + ip + udp + dns (2 tid, 2 flags)
+	if (nbytes < (14 + 20 + 8 + 12 + 1)) // mac + ip + udp + dns + 1 byte dns queries
 		return 0;
 	if (*(pkt + 12) == 0x08 && *(pkt + 13) == 0 && // ip protocol
 	    * (pkt + 23) == 0x11 && // udp protocol
 	    ((*(pkt + 34) == 0 && *(pkt + 35) == 0x35) || (*(pkt + 36) == 0 && *(pkt + 37) == 0x35)) && // dns port
-	    ((*(pkt + 45) & 0x80) == 0) // DNS query
-		return 1;
+	    ((*(pkt + 45) & 0x80) == 0)) { // DNS query
+	    	uint8_t *ptr = pkt + 54;
+	    	int sz = 54;
+	    	int i;
+	    	for (i = 0; i < 4; i++) {
+	    		if (*ptr == 0)
+	    			break;
+	    		sz += *ptr + 1;
+	    		if (nbytes < sz)
+	    			return 0;
+	    		ptr += *ptr + 1;
+	    	}
+
+	    	if (*ptr != 0 || nbytes < (sz + 2))
+	    		return 0;
+	    	if (*(ptr + 1) == 0 && *(ptr + 2) == 0x1c)
+	    		return 1;
+
+	    	return 0;
+	}
 
 	return 0;
 }
-#endif
+
 
 static inline int pkt_is_tcp(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
 	if (nbytes < (14 + 20 + 20))	// mac + ip  + tcp

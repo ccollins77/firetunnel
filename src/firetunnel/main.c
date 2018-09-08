@@ -161,7 +161,7 @@ static void parse_args(int argc, char **argv) {
 			tunnel.overlay.defaultgw = profile_defaultgw;
 	}
 
-	logmsg("Header compression %d bytes\n", compress_size());
+	logmsg("Header compression %d bytes\n", compress_l3_size());
 
 	if (tunnel.overlay.mtu == 0)
 		tunnel.overlay.mtu = profile_mtu;
@@ -192,8 +192,8 @@ static void parse_args(int argc, char **argv) {
 int main(int argc, char **argv) {
 	// init
 	memset(&tunnel, 0, sizeof(tunnel));
-	compress_init();
 	compress_l2_init();
+	compress_l3_init();
 
 	// parse command line arguments
 	parse_args(argc, argv);

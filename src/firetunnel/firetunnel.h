@@ -175,10 +175,9 @@ typedef struct packet_header_t {
 #define O_HELLO 0
 #define O_MESSAGE 1
 #define O_DATA  2
-#define O_DATA_COMPRESSED  3
-#define O_DATA_COMPRESSED_DNS  4
-#define O_DATA_COMPRESSED_L2  5
-#define O_MAX 6 // the last one
+#define O_DATA_COMPRESSED_L3  3
+#define O_DATA_COMPRESSED_L2  4
+#define O_MAX 5 // the last one
 
 #if BYTE_ORDER == BIG_ENDIAN
 	uint8_t opcode: 4;
@@ -298,6 +297,13 @@ static inline int pkt_is_arp(uint8_t *pkt, int nbytes) { // pkt - start of the E
 	return 0;
 }
 
+static inline int pkt_is_ip(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
+	if (nbytes <= 14)	// mac
+		return 0;
+	if (*(pkt + 12) == 0x08 && *(pkt + 13) == 0x00) // ip protocol in eth header
+		return 1;
+	return 0;
+}
 static inline int pkt_is_dns(uint8_t *pkt, int nbytes) { // pkt - start of the Ethernet frame
 	if (nbytes < (14 + 20 + 8 + 12)) // mac + ip + udp + dns
 		return 0;
@@ -424,18 +430,18 @@ void load_profile(const char *fname);
 void dns_test(const char *server_ip);
 void dns_set_tunnel(void);
 
-// compress.c
+// compress_l3.c
 typedef enum {
 	S2C = 0, // server to client
 	C2S
 } Direction;
 
-int compress_size(void);
-void compress_init(void);
-void print_compress_table(int direction);
-int classify(uint8_t *pkt, uint8_t *sid, int directin);
-int compress(uint8_t *pkt, int nbytes, uint8_t sid, int direction);
-int decompress(uint8_t *pkt, int nbytes, uint8_t sid, int direction);
+int compress_l3_size(void);
+void compress_l3_init(void);
+void print_compress_l3_table(int direction);
+int classify_l3(uint8_t *pkt, uint8_t *sid, int directin);
+int compress_l3(uint8_t *pkt, int nbytes, uint8_t sid, int direction);
+int decompress_l3(uint8_t *pkt, int nbytes, uint8_t sid, int direction);
 
 // compress_l2.c
 int compress_l2_size(void);
@@ -444,13 +450,5 @@ void print_compress_l2_table(int direction);
 int classify_l2(uint8_t *pkt, uint8_t *sid, int direction);
 int compress_l2(uint8_t *pkt, int nbytes, uint8_t sid, int direction);
 int decompress_l2(uint8_t *pkt, int nbytes, uint8_t sid, int direction);
-
-// compress_dns.c
-int compress_dns_size(void);
-void compress_dns_init(void);
-void print_compress_dns_table(int direction);
-int classify_dns(uint8_t *pkt, uint8_t *sid, int direction);
-int compress_dns(uint8_t *pkt, int nbytes, uint8_t sid, int direction);
-int decompress_dns(uint8_t *pkt, int nbytes, uint8_t sid, int direction);
 
 #endif

@@ -30,9 +30,8 @@ typedef struct session_t {	// offset
 	uint8_t protocol;	// 23
 	uint16_t checksum;	// 24 - use a default value and recalculate in decompress()
 	uint8_t addr[8];	// 26
-	uint8_t tcp[4];	// 34 - tcp/udp port src, dest
-} __attribute__((__packed__)) Session;	// 38
-#define FULL_HEADER_LEN 38
+} __attribute__((__packed__)) Session;	// 34
+#define FULL_HEADER_LEN 34
 
 // fields not included in params above
 typedef struct new_header_t {	// offset
@@ -54,24 +53,16 @@ static void set_session(uint8_t *ptr, Session *s) {
 	s->protocol = *(ptr + 23);
 	s->checksum = 0x55aa;
 	memcpy(s->addr, ptr + 26, 8);
-	memcpy(s->tcp, ptr + 34, 4);
 }
 
 static void print_session(Session *s) {
-	uint32_t ip;
-	memcpy(&ip, s->addr, 4);
-	ip = ntohl(ip);
-
-	uint16_t port;
-	memcpy(&port, s->tcp, 2);
-	port = ntohs(port);
-	printf("%d.%d.%d.%d:%u -> ", PRINT_IP(ip), port);
-
-	memcpy(&ip, s->addr + 4, 4);
-	ip = ntohl(ip);
-	memcpy(&port, s->tcp + 2, 2);
-	port = ntohs(port);
-	printf("%d.%d.%d.%d:%u\n", PRINT_IP(ip), port);
+	uint32_t ip1;
+	uint32_t ip2;
+	memcpy(&ip1, s->addr, 4);
+	ip1 = ntohl(ip1);
+	memcpy(&ip2, s->addr + 4, 4);
+	ip2 = ntohl(ip2);
+	printf("%d.%d.%d.%d -> %d.%d.%d.%d\n", PRINT_IP(ip1), PRINT_IP(ip2));
 }
 
 static void set_new_header(uint8_t *ptr, NewHeader *h) {
@@ -190,7 +181,6 @@ int decompress(uint8_t *pkt, int nbytes, uint8_t sid, int direction) {
 	*(pkt + 22) = h.ttl;
 	*(pkt + 23) = s->protocol;
 	memcpy(pkt + 26, s->addr, 8);
-	memcpy(pkt + 34, s->tcp, 4);
 
 	// calculate ip checksum
 	memset(pkt + 24, 0, 2);

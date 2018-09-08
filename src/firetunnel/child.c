@@ -21,7 +21,7 @@
 
 #define STATS_TIMEOUT_MAX 6	// print stats every STATS_TIMEOUT_MAX * TIMEOUT
 static int statscnt = 0;
-#define COMPRESS_TIMEOUT_MAX (STATS_TIMEOUT_MAX * 4)
+#define COMPRESS_TIMEOUT_MAX (STATS_TIMEOUT_MAX)
 static int compresscnt = 0;
 
 static void send_config(int socket) {

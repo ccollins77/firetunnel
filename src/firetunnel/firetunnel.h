@@ -424,6 +424,7 @@ extern uint32_t profile_mtu;
 extern char *profile_child_seccomp;
 extern char *profile_parent_seccomp;
 void load_profile(const char *fname);
+void save_profile(const char *fname, TOverlay *o);
 
 // dns.c
 void dns_test(const char *server_ip);

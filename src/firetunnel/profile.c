@@ -188,3 +188,32 @@ void load_profile(const char *fname) {
 	fclose(fp);
 }
 
+void save_profile(const char *fname, TOverlay *o) {
+	assert(fname);
+	assert(o);
+	
+	FILE *fp = fopen(fname, "w");
+	if (!fp) {
+		fprintf(stderr, "Error: cannot open runtime file\n");
+		exit(1);
+	}
+	fprintf(fp, "net %s\n", tunnel.bridge_device_name);
+	fprintf(fp, "ignore net\n");
+
+	// copy configuration
+	fprintf(fp, "netmask %d.%d.%d.%d\n", PRINT_IP(o->netmask));
+	fprintf(fp, "defaultgw %d.%d.%d.%d\n", PRINT_IP(o->defaultgw));
+	fprintf(fp, "mtu %d\n", o->mtu);
+	fprintf(fp, "dns %d.%d.%d.%d\n", PRINT_IP(o->dns1));
+	fprintf(fp, "dns %d.%d.%d.%d\n", PRINT_IP(o->dns2));
+	fprintf(fp, "dns %d.%d.%d.%d\n", PRINT_IP(o->dns3));
+
+	// tell firejail to ignore some of the network commands
+	fprintf(fp, "ignore iprange\n");
+	fprintf(fp, "ignore netmask\n");
+	// fprintf(fp, "ignore ip\n");  -  allow ip command
+	fprintf(fp, "ignore defaultgw\n");
+	fprintf(fp, "ignore mtu\n");
+	fprintf(fp, "ignore dns\n");
+	fclose(fp);
+}

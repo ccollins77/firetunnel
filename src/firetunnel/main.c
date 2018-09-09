@@ -261,6 +261,18 @@ int main(int argc, char **argv) {
 		tunnel.udpfd = net_udp_client();
 
 
+	// set firejail configuration for the server
+	if (arg_server) {
+		char *fname;
+		if (asprintf(&fname, "%s/%s", RUN_DIR, tunnel.bridge_device_name) == -1)
+			errExit("asprintf");
+
+		// save configuration
+		save_profile(fname, &tunnel.overlay);
+		logmsg("%s updated\n", fname);
+		free(fname);
+	}
+
 	// set remote for the client
 	tunnel.state = S_DISCONNECTED;
 	if (!arg_server) {
@@ -318,41 +330,18 @@ int main(int argc, char **argv) {
 				char *fname;
 				if (asprintf(&fname, "%s/%s", RUN_DIR, tunnel.bridge_device_name) == -1)
 					errExit("asprintf");
-
-				FILE *fp = fopen(fname, "w");
-				if (!fp) {
-					fprintf(stderr, "Error: cannot open runtime file\n");
-					exit(1);
-				}
-				fprintf(fp, "net %s\n", tunnel.bridge_device_name);
-				fprintf(fp, "ignore net\n");
-
 				TOverlay o;
 				memcpy(&o, buf + 7, sizeof(TOverlay));
 				memcpy(&tunnel.overlay, &o, sizeof(TOverlay));
 
-				// copy configuration
-				fprintf(fp, "netmask %d.%d.%d.%d\n", PRINT_IP(o.netmask));
-				fprintf(fp, "defaultgw %d.%d.%d.%d\n", PRINT_IP(o.defaultgw));
-				fprintf(fp, "mtu %d\n", o.mtu);
-				fprintf(fp, "dns %d.%d.%d.%d\n", PRINT_IP(o.dns1));
-				fprintf(fp, "dns %d.%d.%d.%d\n", PRINT_IP(o.dns2));
-				fprintf(fp, "dns %d.%d.%d.%d\n", PRINT_IP(o.dns3));
-
-				// tell firejail to ignore some of the network commands
-				fprintf(fp, "ignore iprange\n");
-				fprintf(fp, "ignore netmask\n");
-				// fprintf(fp, "ignore ip\n");  -  allow ip command
-				fprintf(fp, "ignore defaultgw\n");
-				fprintf(fp, "ignore mtu\n");
-				fprintf(fp, "ignore dns\n");
-				fclose(fp);
+				// save configuration
+				save_profile(fname, &o);
+				logmsg("%s updated\n", fname);
+				free(fname);
 
 				// configure mtu
 				net_set_mtu(tunnel.bridge_device_name, tunnel.overlay.mtu);
 				net_set_mtu(tunnel.tap_device_name, tunnel.overlay.mtu);
-				logmsg("%s updated\n", fname);
-				free(fname);
 			}
 
 		}

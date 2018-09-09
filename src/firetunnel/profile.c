@@ -119,7 +119,6 @@ static void profile_check_line(char *ptr, int lineno, const char *fname) {
 		return;
 	}
 
-
 	if (strcmp(ptr, "nonat") == 0) {
 		arg_nonat = 1;
 		return;

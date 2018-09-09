@@ -29,6 +29,7 @@ expect {
 }
 sleep 1
 
+set timeout 30
 send -- "wget yahoo.com\r"
 expect {
 	timeout {puts "TESTING ERROR 3\n";exit}

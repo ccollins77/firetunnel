@@ -36,7 +36,7 @@ static void set_session(uint8_t *ptr, Session *s) {
 }
 
 static void print_session(Session *s) {
-	printf("%02x:%02x:%02x:%02x:%02x:%02x ->", PRINT_MAC(s->mac));
+	printf("%02x:%02x:%02x:%02x:%02x:%02x -> ", PRINT_MAC(s->mac));
 	printf("%02x:%02x:%02x:%02x:%02x:%02x ", PRINT_MAC(s->mac + 6));
 	printf("%02x%02x\n", s->mac[12], s->mac[13]);
 }
@@ -60,7 +60,9 @@ void print_compress_l2_table(int direction) {
 	int i;
 	for (i = 0; i < 256; i++, conn++) {
 		if (conn->active) {
-			printf("   %d:%d\t", i, conn->cnt);
+			char buf[16];
+			snprintf(buf, 16, "   %d:%d", i, conn->cnt);
+			printf("%-15s", buf);
 			print_session(&conn->s);
 		}
 	}

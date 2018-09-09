@@ -92,7 +92,9 @@ void print_compress_l3_table(int direction) {
 	int i;
 	for (i = 0; i < 256; i++, conn++) {
 		if (conn->active) {
-			printf("   %d:%d\t", i, conn->cnt);
+			char buf[16];
+			snprintf(buf, 16, "   %d:%d", i, conn->cnt);
+			printf("%-15s", buf);
 			print_session(&conn->s);
 		}
 	}

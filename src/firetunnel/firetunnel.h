@@ -267,8 +267,7 @@ inline static void reset_stats(Tunnel *t) {
 
 // main.c
 #define RUN_DIR "/run/firetunnel"
-#define DEFAUTL_PROFILE (SYSCONFDIR "/default.profile")
-#define DEFAUTL_CONFIG_FILE (SYSCONFDIR "/firetunnel.config")
+#define DEFAULT_PROFILE (SYSCONFDIR "/default.profile")
 
 extern Tunnel tunnel;
 extern int arg_server;		// run this tunnel end as a server

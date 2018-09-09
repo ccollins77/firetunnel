@@ -63,7 +63,7 @@ static void sighdlr(int sig) {
 }
 
 static void parse_args(int argc, char **argv) {
-	char *profile_name = DEFAUTL_PROFILE;
+	char *profile_name = DEFAULT_PROFILE;
 	int i;
 	for (i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-?") == 0 ||
@@ -138,7 +138,6 @@ static void parse_args(int argc, char **argv) {
 		}
 	}
 
-	load_profile(DEFAUTL_CONFIG_FILE);
 	load_profile(profile_name);
 	dns_set_tunnel();
 

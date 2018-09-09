@@ -115,6 +115,7 @@ void child(int socket) {
 					int direction = (arg_server)? S2C: C2S;
 					print_compress_l2_table(direction);
 					print_compress_l3_table(direction);
+					printf("\n");
 				}
 			}
 

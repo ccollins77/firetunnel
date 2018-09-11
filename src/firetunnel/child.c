@@ -177,9 +177,15 @@ void child(int socket) {
 				else
 					pkt_set_header(&hdr, O_DATA, tunnel.seq);
 
+#if 0
 				int rv =  scramble(ethptr, nbytes);
 				hdr.pad = rv;
 				nbytes += rv;
+#endif
+
+				scramble(ethptr, nbytes);
+				hdr.pad = 0;
+
 				memcpy(ethptr - hlen, &hdr, hlen);
 
 				// add BLAKE2 authentication

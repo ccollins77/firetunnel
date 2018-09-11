@@ -166,10 +166,8 @@ static void parse_args(int argc, char **argv) {
 		tunnel.overlay.mtu = profile_mtu;
 	if (tunnel.overlay.mtu == 0) {  // still 0?
 		// calculate the MTU based on runtime information
-		// 1500 - mac - ip - udp - firetunnel - hmac - padding
+		// 1500 - mac - ip - udp - firetunnel - hmac
 		tunnel.overlay.mtu = 1500 - 14 - 20 - 8 - sizeof(PacketHeader) - KEY_LEN ;
-		if (!arg_noscrambling)
-			tunnel.overlay.mtu -= scramble_blocklen() - 1;
 	}
 	logmsg("Tunnel mtu %d\n", tunnel.overlay.mtu);
 

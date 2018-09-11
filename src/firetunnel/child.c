@@ -177,12 +177,6 @@ void child(int socket) {
 				else
 					pkt_set_header(&hdr, O_DATA, tunnel.seq);
 
-#if 0
-				int rv =  scramble(ethptr, nbytes);
-				hdr.pad = rv;
-				nbytes += rv;
-#endif
-
 				scramble(ethptr, nbytes);
 				hdr.pad = 0;
 
@@ -233,12 +227,8 @@ void child(int socket) {
 					dbg_printf("data ");
 
 					// descramble
-					if (descramble(udpframe->eth, nbytes - hlen - KEY_LEN)) {
-						dbg_printf("drop descramble\n");
-						tunnel.stats.udp_rx_drop_pkt++;
-						tunnel.stats.udp_rx_drop_padding_pkt++;
-					}
-					else {
+					descramble(udpframe->eth, nbytes - hlen - KEY_LEN);
+					{
 						nbytes -= hlen + KEY_LEN;
 						int direction = (arg_server)? C2S: S2C;
 						nbytes -= udpframe->header.pad;

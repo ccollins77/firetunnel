@@ -17,7 +17,21 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
-#include "firetunnel.h"
+//#include "firetunnel.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <assert.h>
+#include <string.h>
+
+#if 0
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <syslog.h>
+#endif
 
 //**********************************************************************************
 // Skytale scrambler
@@ -27,7 +41,7 @@
 // and the Spartans in particular, are said to have used this cipher to communicate during
 // military campaigns.
 //
-// More:  https://en.wikipedia.org/wiki/Scytale
+// More: https://en.wikipedia.org/wiki/Scytale
 //
 // Please don't confuse this for serious encryption. Network traffic is highly recognizable.
 // Somebody who knows what he's doing will figure this out in exactly 10 minutes just by
@@ -55,12 +69,14 @@ static void skytale(uint8_t *in) {
 
 
 
-// scrambling function
-__attribute__((weak)) void scramble(uint8_t *ptr, int len) {
+// scrambling function called for each packet;
+void scramble(uint8_t *ptr, int len) {
 	assert(ptr);
 
 	// no scrambling if the program was started with --noscrambling command line option
-	if (arg_noscrambling || len < BLOCKLEN)
+//	if (arg_noscrambling)
+//		return;
+	if (len < BLOCKLEN)
 		return;
 
 	// padding: multiple of BLOCKLEN
@@ -70,15 +86,16 @@ __attribute__((weak)) void scramble(uint8_t *ptr, int len) {
 
 	if (len % BLOCKLEN)
 		skytale(ptr + len - BLOCKLEN);
-
 }
 
-// descrambling function
-__attribute__((weak)) void descramble(uint8_t *ptr, int len) {
+// descrambling function called for each packet;
+void descramble(uint8_t *ptr, int len) {
 	assert(ptr);
 
 	// no scrambling if the program was started with --noscrambling command line option
-	if (arg_noscrambling || len < BLOCKLEN)
+//	if (arg_noscrambling)
+//		return;
+	if (len < BLOCKLEN)
 		return;
 
 	if (len % BLOCKLEN)
@@ -89,5 +106,43 @@ __attribute__((weak)) void descramble(uint8_t *ptr, int len) {
 		skytale(ptr + i * BLOCKLEN);
 }
 
+int main(int argc, char **argv) {
+	if (argc != 2) {
+		printf("usage: ./a.out bufsize\n");
+		return 1;
+	}
+	int buflen = atoi(argv[1]);
 
+	uint8_t *buf = malloc(buflen);
+	uint8_t *buf_in = malloc(buflen);
+	uint8_t *buf_out = malloc(buflen);
+	srand(time(NULL));
 
+	int i;
+	for (i = 0; i < buflen; i++) {
+		buf_in[i] = (uint8_t) ( rand() % 256);
+		printf("%02x ", buf_in[i]);
+	}
+	printf("\n");
+
+	memcpy(buf, buf_in, buflen);
+	scramble(buf, buflen);
+	for (i = 0; i < buflen; i++) {
+		printf("%02x ", buf[i]);
+	}
+	printf("\n");
+
+	memcpy(buf_out, buf, buflen);
+	descramble(buf_out, buflen);
+
+	for (i = 0; i < buflen; i++) {
+		printf("%02x ", buf_out[i]);
+	}
+	printf("\n");
+	for (i = 0; i < buflen; i++) {
+		if (buf_out[i] != buf_in[i])
+			printf("error position %d\n", i);
+	}
+
+	return 0;
+}

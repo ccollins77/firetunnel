@@ -181,9 +181,9 @@ typedef struct packet_header_t {
 
 #if BYTE_ORDER == BIG_ENDIAN
 	uint8_t opcode: 4;
-	uint8_t pad: 4;
+	uint8_t reserved: 4;
 #elif BYTE_ORDER == LITTLE_ENDIAN
-	uint8_t pad: 4;
+	uint8_t reserved: 4;
 	uint8_t opcode: 4;
 #endif
 
@@ -388,7 +388,7 @@ uint8_t *get_hash(uint8_t *in, unsigned inlen, uint32_t timestamp, uint32_t seq)
 
 // scramble.c
 void scramble(uint8_t *ptr, int len);
-int descramble(uint8_t *ptr, int len);	// returns 1 if error
+void descramble(uint8_t *ptr, int len);
 
 // usage.c
 void usage(void);

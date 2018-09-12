@@ -22,7 +22,6 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <fcntl.h>
-#include <syslog.h>
 
 static uint8_t key[KEY_LEN];
 static uint8_t result[KEY_LEN]; // result of hash function

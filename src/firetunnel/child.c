@@ -179,8 +179,6 @@ void child(int socket) {
 					pkt_set_header(&hdr, O_DATA, tunnel.seq);
 
 				scramble(ethptr, nbytes);
-				hdr.pad = 0;
-
 				memcpy(ethptr - hlen, &hdr, hlen);
 
 				// add BLAKE2 authentication
@@ -229,35 +227,32 @@ void child(int socket) {
 
 					// descramble
 					descramble(udpframe->eth, nbytes - hlen - KEY_LEN);
-					{
-						nbytes -= hlen + KEY_LEN;
-						int direction = (arg_server)? C2S: S2C;
-						nbytes -= udpframe->header.pad;
-						uint8_t *ethstart = udpframe->eth;
-						if (opcode == O_DATA_COMPRESSED_L3) {
-							dbg_printf("decompress ");
-							rv = decompress_l3(ethstart, nbytes, udpframe->header.sid, direction);
-							ethstart -= rv;
-							nbytes += rv;
-						}
-						else if (opcode == O_DATA_COMPRESSED_L2) {
-							dbg_printf("decompress L2 ");
-							rv = decompress_l2(ethstart, nbytes, udpframe->header.sid, direction);
-							ethstart -= rv;
-							nbytes += rv;
-						}
-						if (pkt_is_ip(ethstart, nbytes) || pkt_is_udp(ethstart, nbytes))
-							classify_l3(ethstart, NULL, direction);
-						else
-							classify_l2(ethstart, NULL, direction);
-
-						// write to tap device
-						dbg_printf("send tap ");
-						rv = write(tunnel.tapfd, ethstart, nbytes);
-						dbg_printf("%d\n", rv);
-						if (rv == -1)
-							perror("write");
+					nbytes -= hlen + KEY_LEN;
+					int direction = (arg_server)? C2S: S2C;
+					uint8_t *ethstart = udpframe->eth;
+					if (opcode == O_DATA_COMPRESSED_L3) {
+						dbg_printf("decompress ");
+						rv = decompress_l3(ethstart, nbytes, udpframe->header.sid, direction);
+						ethstart -= rv;
+						nbytes += rv;
 					}
+					else if (opcode == O_DATA_COMPRESSED_L2) {
+						dbg_printf("decompress L2 ");
+						rv = decompress_l2(ethstart, nbytes, udpframe->header.sid, direction);
+						ethstart -= rv;
+						nbytes += rv;
+					}
+					if (pkt_is_ip(ethstart, nbytes) || pkt_is_udp(ethstart, nbytes))
+						classify_l3(ethstart, NULL, direction);
+					else
+						classify_l2(ethstart, NULL, direction);
+
+					// write to tap device
+					dbg_printf("send tap ");
+					rv = write(tunnel.tapfd, ethstart, nbytes);
+					dbg_printf("%d\n", rv);
+					if (rv == -1)
+						perror("write");
 				}
 
 				else if (opcode == O_HELLO) {

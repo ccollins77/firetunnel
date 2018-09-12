@@ -387,8 +387,8 @@ void init_keys(uint16_t port);
 uint8_t *get_hash(uint8_t *in, unsigned inlen, uint32_t timestamp, uint32_t seq);
 
 // scramble.c
-void scramble(uint8_t *ptr, int len);
-void descramble(uint8_t *ptr, int len);
+void scramble(uint8_t *ptr, int len, PacketHeader *hdr);
+void descramble(uint8_t *ptr, int len, PacketHeader *hdr);
 
 // usage.c
 void usage(void);

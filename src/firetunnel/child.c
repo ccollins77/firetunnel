@@ -178,7 +178,7 @@ void child(int socket) {
 				else
 					pkt_set_header(&hdr, O_DATA, tunnel.seq);
 
-				scramble(ethptr, nbytes);
+				scramble(ethptr, nbytes, &hdr);
 				memcpy(ethptr - hlen, &hdr, hlen);
 
 				// add BLAKE2 authentication
@@ -226,7 +226,7 @@ void child(int socket) {
 					dbg_printf("data ");
 
 					// descramble
-					descramble(udpframe->eth, nbytes - hlen - KEY_LEN);
+					descramble(udpframe->eth, nbytes - hlen - KEY_LEN, &udpframe->header);
 					nbytes -= hlen + KEY_LEN;
 					int direction = (arg_server)? C2S: S2C;
 					uint8_t *ethstart = udpframe->eth;

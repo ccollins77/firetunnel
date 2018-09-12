@@ -53,11 +53,14 @@ static void skytale(uint8_t *in) {
 	memcpy(in, out, BLOCKLEN);
 }
 
-
+#ifdef TESTING
+int arg_noscrambling = 0;
+#endif
 
 // scrambling function
-__attribute__((weak)) void scramble(uint8_t *ptr, int len) {
+__attribute__((weak)) void scramble(uint8_t *ptr, int len, PacketHeader *hdr) {
 	assert(ptr);
+	(void) hdr;
 
 	// no scrambling if the program was started with --noscrambling command line option
 	if (arg_noscrambling || len < BLOCKLEN)
@@ -74,8 +77,9 @@ __attribute__((weak)) void scramble(uint8_t *ptr, int len) {
 }
 
 // descrambling function
-__attribute__((weak)) void descramble(uint8_t *ptr, int len) {
+__attribute__((weak)) void descramble(uint8_t *ptr, int len, PacketHeader *hdr) {
 	assert(ptr);
+	(void) hdr;
 
 	// no scrambling if the program was started with --noscrambling command line option
 	if (arg_noscrambling || len < BLOCKLEN)
@@ -89,5 +93,50 @@ __attribute__((weak)) void descramble(uint8_t *ptr, int len) {
 		skytale(ptr + i * BLOCKLEN);
 }
 
+#ifdef TESTING
+#include <time.h>
+int main(int argc, char **argv) {
+	PacketHeader h;
+
+	if (argc != 2) {
+		printf("usage: ./a.out bufsize\n");
+		return 1;
+	}
+	int buflen = atoi(argv[1]);
+
+	uint8_t *buf = malloc(buflen);
+	uint8_t *buf_in = malloc(buflen);
+	uint8_t *buf_out = malloc(buflen);
+	srand(time(NULL));
+
+	int i;
+	for (i = 0; i < buflen; i++) {
+		buf_in[i] = (uint8_t) ( rand() % 256);
+		printf("%02x ", buf_in[i]);
+	}
+	printf("\n");
+
+	memcpy(buf, buf_in, buflen);
+	scramble(buf, buflen, &h);
+	for (i = 0; i < buflen; i++) {
+		printf("%02x ", buf[i]);
+	}
+	printf("\n");
+
+	memcpy(buf_out, buf, buflen);
+	descramble(buf_out, buflen, &h);
+
+	for (i = 0; i < buflen; i++) {
+		printf("%02x ", buf_out[i]);
+	}
+	printf("\n");
+	for (i = 0; i < buflen; i++) {
+		if (buf_out[i] != buf_in[i])
+			printf("error position %d\n", i);
+	}
+
+	return 0;
+}
+#endif
 
 

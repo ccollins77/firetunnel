@@ -95,8 +95,26 @@ __attribute__((weak)) void descramble(uint8_t *ptr, int len, PacketHeader *hdr) 
 
 #ifdef TESTING
 #include <time.h>
+
+// rtdsc timestamp on x86-64/amd64  processors
+static inline unsigned long long getticks(void) {
+#if defined(__x86_64__)
+	unsigned a, d;
+	asm volatile("rdtsc" : "=a" (a), "=d" (d));
+	return ((unsigned long long)a) | (((unsigned long long)d) << 32);
+#elif defined(__i386__)
+	unsigned long long ret;
+	__asm__ __volatile__("rdtsc" : "=A" (ret));
+	return ret;
+#else
+	return 0; // not implemented
+#endif
+}
+
+
 int main(int argc, char **argv) {
 	PacketHeader h;
+	memset(&h, 0, sizeof(h));
 
 	if (argc != 2) {
 		printf("usage: ./a.out bufsize\n");
@@ -107,7 +125,7 @@ int main(int argc, char **argv) {
 	uint8_t *buf = malloc(buflen);
 	uint8_t *buf_in = malloc(buflen);
 	uint8_t *buf_out = malloc(buflen);
-	srand(time(NULL));
+//	srand(time(NULL));
 
 	int i;
 	for (i = 0; i < buflen; i++) {
@@ -135,8 +153,25 @@ int main(int argc, char **argv) {
 			printf("error position %d\n", i);
 	}
 
+	// evaluate time
+	for (i = 0; i < buflen; i++) {
+		buf_in[i] = (uint8_t) ( rand() % 256);
+	}
+
+	unsigned cnt = 10000;
+	unsigned long long tstart = getticks();
+	for (i = 0; i < cnt; i++)
+		scramble(buf, buflen, &h);
+	unsigned long long tend = getticks();
+	usleep(1000);
+	unsigned long long t1ms = getticks();
+	double delta = (double) (tend - tstart) / (double) cnt;
+	printf("Average time %f ms\n", delta / (double) (t1ms - tend));
+
+	free(buf);
+	free(buf_in);
+	free(buf_out);
+
 	return 0;
 }
 #endif
-
-

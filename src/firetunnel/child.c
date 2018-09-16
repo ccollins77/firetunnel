@@ -82,22 +82,24 @@ void child(int socket) {
 
 			// send HELLO packet
 			// the client always sends it, regardless of the connection status
-			if (tunnel.state == S_CONNECTED || !arg_server)
+			if (tunnel.state == S_CONNECTED || !arg_server) {
+				dbg_printf("\ntunnel tx hello ");
 				pkt_send_hello(udpframe, tunnel.udpfd);
+				dbg_printf("\n");
+			}
 
 			// check connect ttl
 			if (--tunnel.connect_ttl < 1) {
 				tunnel.state = S_DISCONNECTED;
 				tunnel.seq = 0;
-				tunnel.remote_seq = 0;
 				if (tunnel.connect_ttl == 0) {
+					logmsg("%d.%d.%d.%d:%d disconnected\n",
+					       PRINT_IP(ntohl(tunnel.remote_sock_addr.sin_addr.s_addr)),
+					       ntohs(tunnel.remote_sock_addr.sin_port));
 					if (arg_server)
 						memset(&tunnel.remote_sock_addr, 0, sizeof(tunnel.remote_sock_addr));
 					compress_l2_init();
 					compress_l3_init();
-					logmsg("%d.%d.%d.%d:%d disconnected\n",
-					       PRINT_IP(ntohl(tunnel.remote_sock_addr.sin_addr.s_addr)),
-					       ntohs(tunnel.remote_sock_addr.sin_port));
 				}
 
 				tunnel.connect_ttl = 0;
@@ -130,7 +132,7 @@ void child(int socket) {
 			nbytes = read(tunnel.tapfd, udpframe->eth, sizeof(UdpFrame) - hlen);
 			if (nbytes == -1)
 				perror("read");
-			dbg_printf("tap rx %d ", nbytes);
+			dbg_printf("\ntap rx %d ", nbytes);
 
 			// eth header size of 14
 			if (nbytes <=14)
@@ -211,14 +213,18 @@ void child(int socket) {
 
 			// update stats
 			tunnel.stats.udp_rx_pkt++;
-			dbg_printf("tunnel rx %d ", nbytes);
+			dbg_printf("\ntunnel rx %d ", nbytes);
 
 			if (pkt_check_header(udpframe, nbytes, &client_addr)) { // also does BLAKE2 authentication
-				// update remote seq
-				if (tunnel.remote_seq < ntohs(udpframe->header.seq) ||
-				    (ntohs(udpframe->header.seq) < SEQ_DELTA_MAX &&
-				     tunnel.remote_seq > (0xffff - SEQ_DELTA_MAX)))
-					tunnel.remote_seq = ntohs(udpframe->header.seq);
+				if (tunnel.state == S_CONNECTED)
+					tunnel.connect_ttl = CONNECT_TTL;
+				if (udpframe->header.flags & F_SYNC) {
+					logmsg("sync requested by %d.%d.%d.%d:%d\n",
+					       PRINT_IP(ntohl(client_addr.sin_addr.s_addr)),
+					       ntohs(client_addr.sin_port));
+					compress_l2_init();
+					compress_l3_init();
+				}
 
 				uint8_t opcode = udpframe->header.opcode;
 				if (opcode == O_DATA || opcode == O_DATA_COMPRESSED_L3 ||
@@ -256,7 +262,8 @@ void child(int socket) {
 				}
 
 				else if (opcode == O_HELLO) {
-					dbg_printf("hello\n");
+					dbg_printf("hello ");
+
 					if (tunnel.state == S_DISCONNECTED) {
 						tunnel.state = S_CONNECTED;
 						tunnel.seq = 0;
@@ -273,11 +280,15 @@ void child(int socket) {
 						logmsg("%d.%d.%d.%d:%d connected\n",
 						       PRINT_IP(ntohl(tunnel.remote_sock_addr.sin_addr.s_addr)),
 						       ntohs(tunnel.remote_sock_addr.sin_port));
+						compress_l2_init();
+						compress_l3_init();
 					}
 					tunnel.connect_ttl = CONNECT_TTL;
 
 					// update overlay data if we are the client
 					if (!arg_server) {
+						descramble(udpframe->eth, 7 * sizeof(uint32_t), &udpframe->header);
+
 						uint32_t *ptr = (uint32_t *) &udpframe->eth[0];
 						TOverlay o;
 						o.netaddr = ntohl(*ptr++);
@@ -300,6 +311,7 @@ void child(int socket) {
 							send_config(socket);
 						}
 					}
+					dbg_printf("\n");
 				}
 
 				else if (opcode == O_MESSAGE) {

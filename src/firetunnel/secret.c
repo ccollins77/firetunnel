@@ -25,8 +25,8 @@
 
 static uint8_t key[KEY_LEN];
 static uint8_t result[KEY_LEN]; // result of hash function
-static uint8_t dictionary[KEY_LEN * KEY_MAX] = {179, 55, 2, 143, 241, 56, 61, 17, 189, 69, 20, 111, 172, 130, 54, 15};
-uint8_t extra_key[KEY_LEN];
+static uint8_t auth_dictionary[KEY_LEN * KEY_MAX] = {179, 55, 2, 143, 241, 56, 61, 17, 189, 69, 20, 111, 172, 130, 54, 15};
+uint8_t enc_dictionary[KEY_LEN * KEY_MAX];
 
 void init_keys(uint16_t port) {
 	// open SECRET_FILE and read it
@@ -49,20 +49,26 @@ void init_keys(uint16_t port) {
 	}
 
 
-	// create keys
+	// create auth keys
 	int i;
 	port = htons(port);
-	memcpy(dictionary, &port, sizeof(port));
+	memcpy(auth_dictionary, &port, sizeof(port));
 	for (i  = 0; i < KEY_MAX; i++) {
 		if (i != 0)
-			memcpy(dictionary + i * KEY_LEN, dictionary + (i - 1) * KEY_LEN, KEY_LEN);
+			memcpy(auth_dictionary + i * KEY_LEN, auth_dictionary + (i - 1) * KEY_LEN, KEY_LEN);
 		get_hash(data, s.st_size, 0, i);
-		memcpy(dictionary + i * KEY_LEN, result, KEY_LEN);
+		memcpy(auth_dictionary + i * KEY_LEN, result, KEY_LEN);
 	}
 
-	// set the extra key
-	get_hash(dictionary, sizeof(dictionary), 0, i);
-	memcpy(extra_key, result, KEY_LEN);
+	// create enc keys
+	get_hash(auth_dictionary, sizeof(auth_dictionary), 0, i);
+	memcpy(enc_dictionary, result, KEY_LEN);
+	for (i  = 0; i < KEY_MAX; i++) {
+		if (i != 0)
+			memcpy(enc_dictionary + i * KEY_LEN, enc_dictionary + (i - 1) * KEY_LEN, KEY_LEN);
+		get_hash(data, s.st_size, 0, i);
+		memcpy(enc_dictionary + i * KEY_LEN, result, KEY_LEN);
+	}
 
 	munmap(data, s.st_size);
 	close(fd);
@@ -73,7 +79,9 @@ void init_keys(uint16_t port) {
 uint8_t *get_hash(uint8_t *in, unsigned inlen, uint32_t timestamp, uint32_t seq) {
 	// grab the key from the dictionary
 	int index = (seq + timestamp) % KEY_MAX;
-	memcpy(key, dictionary + index * KEY_LEN, KEY_LEN);
+	dbg_printf("authindex %d ", index);
+	fflush(0);
+	memcpy(key, auth_dictionary + index * KEY_LEN, KEY_LEN);
 
 	if (blake2(result, KEY_LEN, in, inlen, key, KEY_LEN))
 		errExit("blake2");

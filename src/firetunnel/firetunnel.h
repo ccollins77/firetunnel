@@ -81,26 +81,7 @@ static inline uint32_t diff_uint32(uint32_t val1, uint32_t val2) {
 	}
 
 	uint32_t delta1 = a - b;
-	uint32_t delta2 = 0xffff - a + b;
-	if (delta1 < delta2)
-		return delta1;
-	return delta2;
-}
-
-static inline uint16_t diff_uint16(uint16_t val1, uint16_t val2) {
-	uint16_t a;
-	uint16_t b;
-	if (val1 > val2) {
-		a = val1;
-		b = val2;
-	}
-	else {
-		a = val2;
-		b = val1;
-	}
-
-	uint16_t delta1 = a - b;
-	uint16_t delta2 = 0xffff - a + b;
+	uint32_t delta2 = 0xffffffff - a + b;
 	if (delta1 < delta2)
 		return delta1;
 	return delta2;
@@ -179,11 +160,14 @@ typedef struct packet_header_t {
 #define O_DATA_COMPRESSED_L2  4
 #define O_MAX 5 // the last one
 
+// flags
+#define F_SYNC 1
+
 #if BYTE_ORDER == BIG_ENDIAN
 	uint8_t opcode: 4;
-	uint8_t reserved: 4;
+	uint8_t flags: 4;
 #elif BYTE_ORDER == LITTLE_ENDIAN
-	uint8_t reserved: 4;
+	uint8_t flags: 4;
 	uint8_t opcode: 4;
 #endif
 
@@ -251,7 +235,6 @@ typedef struct tunnel_t {
 	int connect_ttl;
 	struct sockaddr_in remote_sock_addr;
 	uint16_t seq;
-	uint16_t remote_seq;
 
 	// network overlay - the configuration takes place on the server side
 	TOverlay overlay;
@@ -382,7 +365,7 @@ void logmsg(char *fmt, ...);
 int blake2( void *out, size_t outlen, const void *in, size_t inlen, const void *key, size_t keylen );
 
 // secret.c
-uint8_t extra_key[KEY_LEN];
+uint8_t enc_dictionary[KEY_LEN * KEY_MAX];
 void init_keys(uint16_t port);
 uint8_t *get_hash(uint8_t *in, unsigned inlen, uint32_t timestamp, uint32_t seq);
 

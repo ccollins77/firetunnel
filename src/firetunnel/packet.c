@@ -80,17 +80,9 @@ int pkt_check_header(UdpFrame *pkt, unsigned len, struct sockaddr_in *client_add
 		return 0;
 	}
 
-	// check seq
-	uint16_t seq = ntohs(header->seq);
-	// 1. accept packet if not more then +-SEQ_DELTA_MAX difference
-	uint16_t delta16 = diff_uint16(tunnel.remote_seq, seq);
-	if (delta16 > SEQ_DELTA_MAX) {
-		tunnel.stats.udp_rx_drop_seq_pkt++;
-		return 0;
-	}
-
-	// 2. accept packet if bigger timestamp than what we have stored in scache
+	// accept packet if bigger timestamp than what we have stored in scache
 	// this basically limits the incoming speed  to SEQ_DELTA_MAX packets per second
+	uint16_t seq = ntohs(header->seq);
 	uint32_t index = seq  & SEQ_BITMAP;
 	if (timestamp <= scache[index]) {
 		tunnel.stats.udp_rx_drop_seq_pkt++;
@@ -119,6 +111,8 @@ void pkt_send_hello(UdpFrame *frame, int udpfd) {
 	// set header
 	tunnel.seq++;
 	pkt_set_header(&frame->header, O_HELLO,  tunnel.seq);
+	if (tunnel.state == S_DISCONNECTED)
+		frame->header.flags |= F_SYNC;
 	int nbytes = sizeof(PacketHeader);
 
 	// send overlay data if we are the server
@@ -131,6 +125,7 @@ void pkt_send_hello(UdpFrame *frame, int udpfd) {
 		*ptr++ = htonl(tunnel.overlay.dns1);
 		*ptr++ = htonl(tunnel.overlay.dns2);
 		*ptr++ = htonl(tunnel.overlay.dns3);
+		scramble((uint8_t *) &frame->eth, 7 * sizeof(uint32_t), &frame->header);
 		nbytes += 7 * sizeof(uint32_t);
 	}
 

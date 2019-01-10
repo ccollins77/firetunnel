@@ -45,7 +45,7 @@ The server itself is the default gateway at 10.10.20.1.
 It is also the place where your packets go out on the Internet using NAT.
 .PP
 MTU is calculated on the server side for the specific
-tunnel configuration. The default value is 1426.
+tunnel configuration. The default value is 1434.
 .PP
 The tunnel uses header compression for MAC/IP/TCP layers. This results in
 better response time due to the smaller packet sizes, and reduces the
@@ -92,7 +92,7 @@ In a few seconds you will see the client connecting and receiving the tunnel con
 .RS
 2018-08-01 21:09:01 198.51.100.23:1119 connected
 .br
-2018-08-01 21:09:01 Tunnel: 10.10.20.0/24, default gw 10.10.20.1, mtu 1426
+2018-08-01 21:09:01 Tunnel: 10.10.20.0/24, default gw 10.10.20.1, mtu 1434
 .br
 2018-08-01 21:09:01 Tunnel: DNS 1.1.1.1, 208.67.222.222, 9.9.9.9
 .br
@@ -146,7 +146,7 @@ and pick up the fastest three.
 
 .TP
 \fB\-\-mtu=number
-In the default configuration maximum transmission unit for the interfaces inside the tunnel is 1426.
+In the default configuration maximum transmission unit for the interfaces inside the tunnel is 1434.
 Use this option on the server side of the tunnel to overwrite the default.
 
 .TP

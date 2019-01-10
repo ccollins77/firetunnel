@@ -34,7 +34,7 @@ void usage(void) {
 	printf("   --dns=address - add this DNS server to the list of servers\n");
 	printf("   --help, ? - this help screen\n");
 	printf("   --mtu=number - maximum transmission uint for interfaces inside the tunnel\n");
-	printf("\tdefault 1426\n");
+	printf("\tdefault 1434\n");
 	printf("   --netaddr=address - tunnel network address, default 10.10.20.0\n");
 	printf("   --netmask=mask - tunnel network mask, default 255.255.255.0\n");
 	printf("   --nonat - network address translation disabled\n");

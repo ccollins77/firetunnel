@@ -90,7 +90,7 @@ In a different terminal on your home computer start the client:
 In a few seconds you will see the client connecting and receiving the tunnel configuration:
 `````
 2018-08-01 21:09:01 198.51.100.23:1119 connected
-2018-08-01 21:09:01 Tunnel: 10.10.20.0/24, default gw 10.10.20.1, mtu 1426
+2018-08-01 21:09:01 Tunnel: 10.10.20.0/24, default gw 10.10.20.1, mtu 1434
 2018-08-01 21:09:01 Tunnel: DNS 1.1.1.1, 208.67.222.222, 9.9.9.9
 `````
 All the commands above are entered as root. Time to switch back to your regular user

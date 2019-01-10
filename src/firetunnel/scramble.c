@@ -165,8 +165,12 @@ int main(int argc, char **argv) {
 	unsigned long long tend = getticks();
 	usleep(1000);
 	unsigned long long t1ms = getticks();
-	double delta = (double) (tend - tstart) / (double) cnt;
-	printf("Average time %f ms\n", delta / (double) (t1ms - tend));
+
+	double delta = (double) (tend - tstart) / (double) (t1ms - tend);
+	double delta_packet = delta / cnt;
+	double delta_byte = (delta_packet * 1000) / buflen;
+	double rate = 8 / delta_byte;
+	printf("Skytale %d bytes: %f ms / packet, rate %f Mbps\n", buflen, delta_packet, rate);
 
 	free(buf);
 	free(buf_in);
